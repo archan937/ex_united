@@ -19,7 +19,7 @@ defmodule ExUnited.MixProject do
 
   defp deps do
     [
-      
+      {:credo, "~> 1.3", only: [:dev, :test], runtime: false}
     ]
   end
 end
