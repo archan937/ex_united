@@ -8,7 +8,14 @@ defmodule ExUnited.MixProject do
       elixir: ">= 1.5.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: dialyzer()
+      dialyzer: dialyzer(),
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -21,7 +28,8 @@ defmodule ExUnited.MixProject do
   defp deps do
     [
       {:credo, "~> 1.3", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:excoveralls, "~> 0.12.3", only: [:dev, :test]}
     ]
   end
 
