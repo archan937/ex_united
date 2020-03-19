@@ -23,3 +23,5 @@ erl_crash.dump
 ex_united-*.tar
 
 .DS_Store
+*.plt
+*.plt.hash

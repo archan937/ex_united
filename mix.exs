@@ -7,7 +7,8 @@ defmodule ExUnited.MixProject do
       version: "0.1.0",
       elixir: ">= 1.5.0",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      dialyzer: dialyzer()
     ]
   end
 
@@ -19,7 +20,16 @@ defmodule ExUnited.MixProject do
 
   defp deps do
     [
-      {:credo, "~> 1.3", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.3", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_file: {:no_warn, ".ex_united.plt"},
+      plt_add_apps: [:mix],
+      ignore_warnings: ".dialyzer-ignore.exs"
     ]
   end
 end
