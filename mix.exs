@@ -8,6 +8,7 @@ defmodule ExUnited.MixProject do
       elixir: ">= 1.5.0",
       elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps(),
       dialyzer: dialyzer(),
       preferred_cli_env: [
@@ -26,6 +27,20 @@ defmodule ExUnited.MixProject do
     ]
   end
 
+  defp aliases do
+    [
+      doctor: [
+        "format",
+        "credo --strict",
+        "dialyzer",
+        fn _ ->
+          Mix.env(:test)
+          Mix.Task.run("coveralls", [])
+        end
+      ]
+    ]
+  end
+
   defp deps do
     [
       {:credo, "~> 1.3", only: [:dev, :test], runtime: false},
@@ -38,7 +53,7 @@ defmodule ExUnited.MixProject do
   defp dialyzer do
     [
       plt_file: {:no_warn, ".ex_united.plt"},
-      plt_add_apps: [:mix],
+      plt_add_apps: [:mix, :eex],
       ignore_warnings: ".dialyzer-ignore.exs"
     ]
   end
