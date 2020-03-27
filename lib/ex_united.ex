@@ -9,8 +9,10 @@ defmodule ExUnited do
                  __ENV__.file
                )
 
+  alias ExUnited.Node, as: UNoded
   alias Porcelain.Process, as: Porcess
 
+  @spec start([node], [atom]) :: {:ok, [UNoded.t()]}
   def start(nodes, opts \\ []) do
     Node.start(:"#{@nodename}@#{@nodehost}")
 
@@ -31,6 +33,7 @@ defmodule ExUnited do
     {:ok, spawned}
   end
 
+  @spec stop([UNoded.t()]) :: :ok
   def stop(spawned) do
     Enum.each(spawned, fn {_name, %{pid: pid}} ->
       process = %Porcess{pid: pid}
@@ -39,8 +42,11 @@ defmodule ExUnited do
         Porcess.stop(process)
       end
     end)
+
+    :ok
   end
 
+  @spec generate_files(atom, keyword) :: :ok
   defp generate_files(name, spec) do
     name
     |> config_exs_path()
@@ -49,11 +55,17 @@ defmodule ExUnited do
     name
     |> mix_exs_path()
     |> File.write(mix(name, spec))
+
+    :ok
   end
 
+  @spec config_exs_path(atom) :: binary
   defp config_exs_path(name), do: "/tmp/#{name}-config.exs"
+
+  @spec mix_exs_path(atom) :: binary
   defp mix_exs_path(name), do: "/tmp/#{name}-mix.exs"
 
+  @spec config(keyword) :: binary
   defp config(spec) do
     spec
     |> Keyword.get(:code_paths, [])
@@ -68,6 +80,7 @@ defmodule ExUnited do
     end
   end
 
+  @spec mix(atom, keyword) :: term
   defp mix(name, spec) do
     project =
       Mix.Project.config()
@@ -86,10 +99,12 @@ defmodule ExUnited do
     )
   end
 
+  @spec elixirc_paths(keyword) :: list
   defp elixirc_paths(spec) do
     Keyword.get(spec, :code_paths, [])
   end
 
+  @spec deps() :: list
   defp deps do
     Mix.Project.config()
     |> Keyword.get(:deps)
@@ -98,6 +113,7 @@ defmodule ExUnited do
     end)
   end
 
+  @spec supervised(keyword) :: binary
   defp supervised(spec) do
     case Keyword.get(spec, :supervise) do
       nil ->
@@ -115,6 +131,7 @@ defmodule ExUnited do
     end
   end
 
+  @spec spawn_node(atom, [atom]) :: UNoded.t()
   defp spawn_node(name, opts) do
     captain = Node.self()
     node = :"#{name}@#{@nodehost}"
@@ -150,13 +167,16 @@ defmodule ExUnited do
       end)
     end
 
-    %{node: node, pid: pid, command: command, env: env}
+    %UNoded{node: node, pid: pid, command: command, env: env}
   end
 
+  @spec await_node(node) :: :ok
   defp await_node(node) do
     unless Enum.member?(Node.list(), node) do
       Process.sleep(100)
       await_node(node)
     end
+
+    :ok
   end
 end
