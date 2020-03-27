@@ -1,0 +1,23 @@
+defmodule Void.MixProject do
+  use Mix.Project
+  def project do
+<%= Regex.replace(~r/^/m, inspect(project, pretty: true), "    ") %>
+  end
+  def application do
+    [mod: {Void.Application, []}]
+  end
+end
+
+defmodule Void.Application do
+  use Application
+  def start(_type, _args) do
+    load_config()
+    opts = [strategy: :one_for_one, name: Void.Supervisor]
+    Supervisor.start_link(<%= supervised %>, opts)
+  end
+  defp load_config do
+    <%= inspect(config_exs_path) %>
+    |> Config.Reader.read!()
+    |> Application.put_all_env()
+  end
+end

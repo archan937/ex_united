@@ -1,0 +1,211 @@
+defmodule ExUnited.SupervisedTest do
+  use ExUnit.Case
+
+  describe "supervised" do
+    setup do
+      {:ok, spawned} =
+        ExUnited.start(
+          cristiano: [
+            code_paths: [
+              "test/nodes/ronaldo"
+            ],
+            supervise: [Cristiano]
+          ]
+        )
+
+      on_exit(fn ->
+        teardown(spawned)
+      end)
+
+      spawned
+    end
+
+    test "spins up supervised nodes", spawned do
+      captain = Node.self()
+      [cristiano] = nodes = take(spawned, :node)
+
+      assert :"captain@127.0.0.1" = captain
+      assert ^nodes = Node.list() |> Enum.sort()
+
+      Enum.each(nodes, fn node ->
+        other_nodes = [captain] ++ Enum.sort(nodes -- [node])
+        assert ^other_nodes = :rpc.call(node, Node, :list, []) |> Enum.sort()
+      end)
+
+      assert [
+               "iex --name cristiano@127.0.0.1 --erl '-connect_all false' -S mix run -e 'Node.connect(:\"captain@127.0.0.1\")'"
+             ] = take(spawned, :command)
+
+      assert """
+             import Config
+
+             config :void,
+               greet: "Hi, my name is FULLNAME"
+             """ == File.read!("/tmp/cristiano-config.exs")
+
+      assert """
+             defmodule Void.MixProject do
+               use Mix.Project
+               def project do
+                 [
+                   deps: [
+                     {:credo, "~> 1.3", [only: [:dev, :test], runtime: false]},
+                     {:dialyxir, "~> 1.0", [only: [:dev], runtime: false]},
+                     {:excoveralls, "~> 0.12.3", [only: [:dev, :test]]}
+                   ],
+                   elixirc_paths: ["test/nodes/ronaldo"],
+                   config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
+                   app: :void,
+                   version: "0.1.0",
+                   elixir: ">= 1.5.0"
+                 ]
+               end
+               def application do
+                 [mod: {Void.Application, []}]
+               end
+             end
+
+             defmodule Void.Application do
+               use Application
+               def start(_type, _args) do
+                 load_config()
+                 opts = [strategy: :one_for_one, name: Void.Supervisor]
+                 Supervisor.start_link([Cristiano], opts)
+               end
+               defp load_config do
+                 "/tmp/cristiano-config.exs"
+                 |> Config.Reader.read!()
+                 |> Application.put_all_env()
+               end
+             end
+             """ == File.read!("/tmp/cristiano-mix.exs")
+
+      assert "Hi, my name is FULLNAME" =
+               :rpc.call(cristiano, Application, :get_env, [:void, :greet])
+
+      assert "Hi, my name is Cristiano Ronaldo (1)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
+      assert "Hi, my name is Cristiano Ronaldo (2)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
+      assert "Hi, my name is Cristiano Ronaldo (3)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
+      assert "Hi, my name is Cristiano Ronaldo (4)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
+    end
+  end
+
+  describe "supervised with a dynamic config" do
+    setup do
+      {:ok, spawned} =
+        ExUnited.start(
+          [
+            roy: [
+              code_paths: [
+                "test/nodes/keane"
+              ],
+              supervise: [
+                {
+                  Roy,
+                  talk:
+                    quote do
+                      fn
+                        1 -> "Hi, I am Roy Keane"
+                        2 -> "I am keen as mustard"
+                        3 -> "I like to be peachy keen"
+                      end
+                    end
+                }
+              ]
+            ]
+          ],
+          [:verbose]
+        )
+
+      on_exit(fn ->
+        teardown(spawned)
+      end)
+
+      spawned
+    end
+
+    test "spins up supervised nodes", spawned do
+      captain = Node.self()
+      [roy] = nodes = take(spawned, :node)
+
+      assert :"captain@127.0.0.1" = captain
+      assert ^nodes = Node.list() |> Enum.sort()
+
+      Enum.each(nodes, fn node ->
+        other_nodes = [captain] ++ Enum.sort(nodes -- [node])
+        assert ^other_nodes = :rpc.call(node, Node, :list, []) |> Enum.sort()
+      end)
+
+      assert [
+               "iex --name roy@127.0.0.1 --erl '-connect_all false' -S mix run -e 'Node.connect(:\"captain@127.0.0.1\")'"
+             ] = take(spawned, :command)
+
+      assert """
+             defmodule Void.MixProject do
+               use Mix.Project
+               def project do
+                 [
+                   deps: [
+                     {:credo, "~> 1.3", [only: [:dev, :test], runtime: false]},
+                     {:dialyxir, "~> 1.0", [only: [:dev], runtime: false]},
+                     {:excoveralls, "~> 0.12.3", [only: [:dev, :test]]}
+                   ],
+                   elixirc_paths: ["test/nodes/keane"],
+                   config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
+                   app: :void,
+                   version: "0.1.0",
+                   elixir: ">= 1.5.0"
+                 ]
+               end
+               def application do
+                 [mod: {Void.Application, []}]
+               end
+             end
+
+             defmodule Void.Application do
+               use Application
+               def start(_type, _args) do
+                 load_config()
+                 opts = [strategy: :one_for_one, name: Void.Supervisor]
+                 Supervisor.start_link([{Roy, [talk: fn
+               1 ->
+                 "Hi, I am Roy Keane"
+               2 ->
+                 "I am keen as mustard"
+               3 ->
+                 "I like to be peachy keen"
+             end]}], opts)
+               end
+               defp load_config do
+                 "/tmp/roy-config.exs"
+                 |> Config.Reader.read!()
+                 |> Application.put_all_env()
+               end
+             end
+             """ == File.read!("/tmp/roy-mix.exs")
+
+      assert "Hi, I am Roy Keane" = :rpc.call(roy, Roy, :talk, [])
+      assert "I am keen as mustard" = :rpc.call(roy, Roy, :talk, [])
+      assert "I like to be peachy keen" = :rpc.call(roy, Roy, :talk, [])
+    end
+  end
+
+  defp take(spawned, key) do
+    spawned
+    |> Enum.reduce([], fn
+      {_name, %{node: _node, pid: _pid, env: _env} = node}, list ->
+        list ++ [Map.get(node, key)]
+
+      _, list ->
+        list
+    end)
+  end
+
+  defp teardown(spawned) do
+    ExUnited.stop(spawned)
+
+    "/tmp/*-{config,mix}.exs"
+    |> Path.wildcard()
+    |> Enum.each(&File.rm/1)
+  end
+end
