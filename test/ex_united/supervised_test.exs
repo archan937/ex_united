@@ -1,6 +1,8 @@
 defmodule ExUnited.SupervisedTest do
   use ExUnit.Case
 
+  import TestHelper
+
   describe "supervised" do
     setup do
       {:ok, spawned} =
@@ -188,24 +190,5 @@ defmodule ExUnited.SupervisedTest do
       assert "I am keen as mustard" = :rpc.call(roy, Roy, :talk, [])
       assert "I like to be peachy keen" = :rpc.call(roy, Roy, :talk, [])
     end
-  end
-
-  defp take(spawned, key) do
-    spawned
-    |> Enum.reduce([], fn
-      {_name, %{node: _node, pid: _pid, env: _env} = node}, list ->
-        list ++ [Map.get(node, key)]
-
-      _, list ->
-        list
-    end)
-  end
-
-  defp teardown(spawned) do
-    ExUnited.stop(spawned)
-
-    "/tmp/*-{config,mix}.exs"
-    |> Path.wildcard()
-    |> Enum.each(&File.rm/1)
   end
 end
