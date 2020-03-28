@@ -14,6 +14,11 @@ To install ExUnited, please add `ex_united` to your list of dependencies in `mix
   end
   ```
 
+## TODO
+
+- Write documentation
+- Solve test/ex_united/case_test.exs:26
+
 ## License
 
 Copyright (c) 2020 Paul Engel, released under the MIT License
