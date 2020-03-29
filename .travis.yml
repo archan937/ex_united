@@ -1,0 +1,50 @@
+language: elixir
+
+os:
+  - linux
+
+elixir:
+  - 1.9
+  - 1.8
+  - 1.7
+  - 1.6
+  - 1.5
+
+otp_release:
+  - 22.0
+  - 21.3
+  - 20.3
+  - 19.3
+  - 18.3
+
+matrix:
+  exclude:
+    - elixir: 1.9
+      otp_release: 19.3
+    - elixir: 1.9
+      otp_release: 18.3
+    - elixir: 1.8
+      otp_release: 19.3
+    - elixir: 1.8
+      otp_release: 18.3
+    - elixir: 1.7
+      otp_release: 18.3
+    - elixir: 1.6
+      otp_release: 22.0
+    - elixir: 1.6
+      otp_release: 18.3
+    - elixir: 1.5
+      otp_release: 22.0
+    - elixir: 1.5
+      otp_release: 21.3
+    - elixir: 1.5
+      otp_release: 18.3
+
+before_install:
+  - epmd -daemon
+  - mix local.hex --force
+  - mix local.rebar --force
+  - mix deps.get
+
+script:
+  - mix test --trace

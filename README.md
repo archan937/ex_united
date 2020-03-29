@@ -1,4 +1,4 @@
-# ExUnited
+# ExUnited [![Build Status](https://secure.travis-ci.org/archan937/ex_united.png)](http://travis-ci.org/archan937/ex_united)
 
 Easily spin up (supervising) Elixir nodes within ExUnit tests
 
