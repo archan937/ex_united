@@ -22,9 +22,7 @@ defmodule ExUnited.CaseTest do
       assert :"david@127.0.0.1" = Node.self()
       assert ^node = Node.self()
 
-      # Why doesn't this work?
-      # refute match?(%{node: ^node}, %{node: :foo})
-      # ~> ** (CompileError) nofile:1: undefined function refute/2
+      refute match?(%{node: ^node}, %{node: :foo})
 
       assert "The only time you run out of chances is when you stop taking them." = David.talk()
 

@@ -1,7 +1,7 @@
 defmodule ExUnited.Case do
   @moduledoc false
 
-  def send_message(pid_list, message) do
+  def send_error(pid_list, message) do
     pid_list
     |> :erlang.list_to_pid()
     |> send(message)
@@ -10,7 +10,7 @@ defmodule ExUnited.Case do
   defmacro __using__(_opts) do
     quote do
       use ExUnit.Case
-      import ExUnited.Case, except: [send_message: 2]
+      import ExUnited.Case, except: [send_error: 2]
     end
   end
 
@@ -34,64 +34,20 @@ defmodule ExUnited.Case do
         :code.delete(ExUnitedBlock)
 
         defmodule ExUnitedBlock do
-          defmacro assert({_func, _meta, [left, right]} = ast) do
-            assertion(:assert, ast)
-          end
-
-          defmacro assert({_, [line: line], _} = ast) do
-            exception("assertion", line, ast)
-          end
-
-          defmacro refute({_func, _meta, [left, right]} = ast) do
-            assertion(:refute, ast)
-          end
-
-          defmacro refute({_, [line: line], _} = ast) do
-            exception("refutation", line, ast)
-          end
-
-          defp assertion(type, {func, _meta, [left, right]}) do
-            mod = unquote(__MODULE__)
-
-            left =
-              left
-              |> Macro.escape()
-              |> Macro.postwalk(fn
-                {:{}, [], [:^, meta, [{name, _meta, nil}]]} ->
-                  {name, meta, nil}
-
-                {:{}, [], [name, meta, nil]} ->
-                  {name, meta, nil}
-
-                quoted ->
-                  quoted
-              end)
-
-            quote do
-              :rpc.call(
-                __CAPTAIN__,
-                unquote(mod),
-                :send_message,
-                [
-                  __PID__,
-                  {unquote(type),
-                   {unquote(func), [], [unquote(left), Macro.escape(unquote(right))]}}
-                ]
-              )
-            end
-          end
-
-          defp exception(type, line, ast) do
-            quote do
-              raise %CompileError{
-                description: "#{unquote(type)} not supported: #{unquote(Macro.to_string(ast))}",
-                line: unquote(line)
-              }
-            end
-          end
+          import ExUnit.Assertions
 
           def run(binding) do
-            unquote({:__block__, [], assigns ++ code})
+            try do
+              unquote({:__block__, [], assigns ++ code})
+            rescue
+              error ->
+                :rpc.call(
+                  __CAPTAIN__,
+                  unquote(__MODULE__),
+                  :send_error,
+                  [__PID__, error]
+                )
+            end
           end
         end
       end
@@ -112,15 +68,17 @@ defmodule ExUnited.Case do
 
       :rpc.call(unquote(node), ExUnitedBlock, :run, [unquote(binding)])
 
-      {:assert, __META__, [true]} =
-        quote do
-          assert(true)
-        end
+      message_count =
+        self()
+        |> Process.info(:message_queue_len)
+        |> elem(1)
 
-      for n <- 1..(Process.info(self(), :message_queue_len) |> elem(1)) do
-        receive do
-          {type, assertion} ->
-            Code.eval_quoted({type, __META__, [assertion]})
+      if message_count > 0 do
+        for n <- 0..message_count do
+          receive do
+            error ->
+              raise error
+          end
         end
       end
     end

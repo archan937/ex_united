@@ -17,7 +17,6 @@ To install ExUnited, please add `ex_united` to your list of dependencies in `mix
 ## TODO
 
 - Write documentation
-- Solve test/ex_united/case_test.exs:26
 
 ## License
 
