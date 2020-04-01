@@ -34,20 +34,19 @@ defmodule ExUnited.Case do
         :code.delete(ExUnitedBlock)
 
         defmodule ExUnitedBlock do
+          @moduledoc false
           import ExUnit.Assertions
 
           def run(binding) do
-            try do
-              unquote({:__block__, [], assigns ++ code})
-            rescue
-              error ->
-                :rpc.call(
-                  __CAPTAIN__,
-                  unquote(__MODULE__),
-                  :send_error,
-                  [__PID__, error]
-                )
-            end
+            unquote({:__block__, [], assigns ++ code})
+          rescue
+            error ->
+              :rpc.call(
+                __CAPTAIN__,
+                unquote(__MODULE__),
+                :send_error,
+                [__PID__, error]
+              )
           end
         end
       end
