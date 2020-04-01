@@ -124,14 +124,7 @@ defmodule ExUnited do
         "[]"
 
       children ->
-        quote do
-          (unquote_splicing([children]))
-        end
-        |> Macro.postwalk(fn
-          {:quote, _metadata, children} -> children
-          quoted -> quoted
-        end)
-        |> Macro.to_string()
+        Macro.to_string(children)
     end
   end
 

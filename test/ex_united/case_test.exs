@@ -40,5 +40,16 @@ defmodule ExUnited.CaseTest do
       assert :"david@127.0.0.1" = spawned_node
       assert ^spawned_node = Node.self()
     end
+
+    try do
+      ex_node(david, spawned_node: david) do
+        assert spawned_node != Node.self()
+      end
+    rescue
+      error ->
+        assert %ExUnit.AssertionError{
+                 message: "Assertion with != failed, both sides are exactly equal"
+               } = error
+    end
   end
 end
