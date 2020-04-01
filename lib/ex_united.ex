@@ -103,6 +103,7 @@ defmodule ExUnited do
   defp deps do
     Mix.Project.config()
     |> Keyword.get(:deps)
+    |> Kernel.++([{Keyword.get(config, :app), path: File.cwd!()}])
     |> Enum.reject(fn dep ->
       elem(dep, 0) == :porcelain
     end)
