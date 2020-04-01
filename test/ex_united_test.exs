@@ -87,6 +87,56 @@ defmodule ExUnitedTest do
     end
   end
 
+  describe "dependencies" do
+    setup do
+      {:ok, spawned} = ExUnited.start([:ryan], exclude: [:credo, :dialyxir])
+
+      on_exit(fn ->
+        teardown()
+      end)
+
+      spawned
+    end
+
+    test "excludes specified dependencies" do
+      assert """
+             defmodule Void.MixProject do
+               use Mix.Project
+               def project do
+                 [
+                   deps: [{:excoveralls, \"~> 0.12.3\", [only: [:dev, :test]]}],
+                   elixirc_paths: [],
+                   config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
+                   app: :void,
+                   version: "0.1.0",
+                   elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
+                 ]
+               end
+               def application do
+                 [mod: {Void.Application, []}]
+               end
+             end
+
+             defmodule Void.Application do
+               use Application
+               def start(_type, _args) do
+                 load_config()
+                 opts = [strategy: :one_for_one, name: Void.Supervisor]
+                 Supervisor.start_link([], opts)
+               end
+               defp load_config do
+                 []
+                 |> Enum.each(fn {app, env} ->
+                   Enum.each(env, fn {key, value} ->
+                     Application.put_env(app, key, value)
+                   end)
+                 end)
+               end
+             end
+             """ == File.read!("/tmp/ryan-mix.exs")
+    end
+  end
+
   describe "fully connected" do
     setup do
       {:ok, spawned} = ExUnited.start([:denis, :paul, :duncan], [:connect])

@@ -9,9 +9,11 @@ defmodule ExUnited do
                  __ENV__.file
                )
 
+  @excluded_dependencies [:ex_united, :porcelain]
+
   alias ExUnited.Node, as: UNoded
 
-  @spec start([node], [atom]) :: {:ok, [UNoded.t()]}
+  @spec start([node], [atom | keyword]) :: {:ok, [UNoded.t()]}
   def start(nodes, opts \\ []) do
     Node.start(:"#{@nodename}@#{@nodehost}")
 
@@ -24,7 +26,7 @@ defmodule ExUnited do
             name -> {name, []}
           end
 
-        generate_files(name, spec)
+        generate_files(name, opts, spec)
         {name, spawn_node(name, opts)}
       end)
       |> Enum.into(%{})
@@ -41,15 +43,15 @@ defmodule ExUnited do
     :ok
   end
 
-  @spec generate_files(atom, keyword) :: :ok
-  defp generate_files(name, spec) do
+  @spec generate_files(atom, [atom | keyword], keyword) :: :ok
+  defp generate_files(name, opts, spec) do
     name
     |> config_exs_path()
     |> File.write(config(spec))
 
     name
     |> mix_exs_path()
-    |> File.write(mix(name, spec))
+    |> File.write(mix(name, opts, spec))
 
     :ok
   end
@@ -75,15 +77,17 @@ defmodule ExUnited do
     end
   end
 
-  @spec mix(atom, keyword) :: term
-  defp mix(name, spec) do
+  @spec mix(atom, [atom | keyword], keyword) :: term
+  defp mix(name, opts, spec) do
+    config = Mix.Project.config()
+
     project =
-      Mix.Project.config()
+      config
       |> Keyword.take([:version, :elixir])
       |> Keyword.put(:app, :void)
       |> Keyword.put(:config_path, @emptyconfig)
       |> Keyword.put(:elixirc_paths, elixirc_paths(spec))
-      |> Keyword.put(:deps, deps())
+      |> Keyword.put(:deps, deps(config, opts))
 
     "../ex_united/mix.exs.eex"
     |> Path.expand(__ENV__.file)
@@ -99,13 +103,19 @@ defmodule ExUnited do
     Keyword.get(spec, :code_paths, [])
   end
 
-  @spec deps() :: list
-  defp deps do
-    Mix.Project.config()
+  @spec deps(keyword, [atom | keyword]) :: list
+  defp deps(config, opts) do
+    exclude =
+      opts
+      |> Keyword.get(:exclude)
+      |> List.wrap()
+      |> Kernel.++(@excluded_dependencies)
+
+    config
     |> Keyword.get(:deps)
     |> Kernel.++([{Keyword.get(config, :app), path: File.cwd!()}])
     |> Enum.reject(fn dep ->
-      elem(dep, 0) == :porcelain
+      Enum.member?(exclude, elem(dep, 0))
     end)
   end
 
