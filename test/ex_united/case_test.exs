@@ -8,7 +8,7 @@ defmodule ExUnited.CaseTest do
       ExUnited.start(david: [code_paths: ["test/nodes/beckham"], supervise: [David]])
 
     on_exit(fn ->
-      teardown(spawned)
+      teardown()
     end)
 
     spawned

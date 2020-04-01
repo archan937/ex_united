@@ -8,7 +8,7 @@ defmodule ExUnitedTest do
       {:ok, spawned} = ExUnited.start([:ryan, :george, :bobby])
 
       on_exit(fn ->
-        teardown(spawned)
+        teardown()
       end)
 
       spawned
@@ -22,6 +22,8 @@ defmodule ExUnitedTest do
              ] = take(spawned, :env)
 
       assert """
+             use Mix.Config
+
              # Nothing to see here (sorry)
              """ == File.read!("/tmp/ryan-config.exs")
 
@@ -39,7 +41,7 @@ defmodule ExUnitedTest do
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
                    version: "0.1.0",
-                   elixir: ">= 1.5.0"
+                   elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
                def application do
@@ -55,9 +57,12 @@ defmodule ExUnitedTest do
                  Supervisor.start_link([], opts)
                end
                defp load_config do
-                 "/tmp/bobby-config.exs"
-                 |> Config.Reader.read!()
-                 |> Application.put_all_env()
+                 []
+                 |> Enum.each(fn {app, env} ->
+                   Enum.each(env, fn {key, value} ->
+                     Application.put_env(app, key, value)
+                   end)
+                 end)
                end
              end
              """ == File.read!("/tmp/bobby-mix.exs")
@@ -87,7 +92,7 @@ defmodule ExUnitedTest do
       {:ok, spawned} = ExUnited.start([:denis, :paul, :duncan], [:connect])
 
       on_exit(fn ->
-        teardown(spawned)
+        teardown()
       end)
 
       spawned
@@ -125,7 +130,7 @@ defmodule ExUnitedTest do
         )
 
       on_exit(fn ->
-        teardown(spawned)
+        teardown()
       end)
 
       spawned
@@ -168,7 +173,7 @@ defmodule ExUnitedTest do
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
                    version: "0.1.0",
-                   elixir: ">= 1.5.0"
+                   elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
                def application do
@@ -184,9 +189,12 @@ defmodule ExUnitedTest do
                  Supervisor.start_link([], opts)
                end
                defp load_config do
-                 "/tmp/eric-config.exs"
-                 |> Config.Reader.read!()
-                 |> Application.put_all_env()
+                 [void: [question: "T'as pigé?"]]
+                 |> Enum.each(fn {app, env} ->
+                   Enum.each(env, fn {key, value} ->
+                     Application.put_env(app, key, value)
+                   end)
+                 end)
                end
              end
              """ == File.read!("/tmp/eric-mix.exs")
@@ -207,7 +215,7 @@ defmodule ExUnitedTest do
         )
 
       on_exit(fn ->
-        teardown(spawned)
+        teardown()
       end)
 
       spawned
@@ -230,6 +238,8 @@ defmodule ExUnitedTest do
              ] = take(spawned, :command)
 
       assert """
+             use Mix.Config
+
              # Nothing to see here (sorry)
              """ == File.read!("/tmp/wayne-config.exs")
 
@@ -247,7 +257,7 @@ defmodule ExUnitedTest do
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
                    version: "0.1.0",
-                   elixir: ">= 1.5.0"
+                   elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
                def application do
@@ -263,9 +273,12 @@ defmodule ExUnitedTest do
                  Supervisor.start_link([], opts)
                end
                defp load_config do
-                 "/tmp/wayne-config.exs"
-                 |> Config.Reader.read!()
-                 |> Application.put_all_env()
+                 []
+                 |> Enum.each(fn {app, env} ->
+                   Enum.each(env, fn {key, value} ->
+                     Application.put_env(app, key, value)
+                   end)
+                 end)
                end
              end
              """ == File.read!("/tmp/wayne-mix.exs")

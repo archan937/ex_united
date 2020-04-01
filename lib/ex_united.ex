@@ -10,7 +10,6 @@ defmodule ExUnited do
                )
 
   alias ExUnited.Node, as: UNoded
-  alias Porcelain.Process, as: Porcess
 
   @spec start([node], [atom]) :: {:ok, [UNoded.t()]}
   def start(nodes, opts \\ []) do
@@ -33,15 +32,11 @@ defmodule ExUnited do
     {:ok, spawned}
   end
 
-  @spec stop([UNoded.t()]) :: :ok
-  def stop(spawned) do
-    Enum.each(spawned, fn {_name, %{pid: pid}} ->
-      process = %Porcess{pid: pid}
-
-      if Porcess.alive?(process) do
-        Porcess.stop(process)
-      end
-    end)
+  @spec stop() :: :ok
+  def stop do
+    Porcelain.shell(
+      "ps aux | grep iex | grep 'Node.connect(:\"captain@127.0.0.1\")' | grep -v grep | awk '{print $2}' | xargs kill -9"
+    )
 
     :ok
   end
@@ -94,7 +89,7 @@ defmodule ExUnited do
     |> Path.expand(__ENV__.file)
     |> EEx.eval_file(
       project: project,
-      config_exs_path: config_exs_path(name),
+      all_env: read_config(name),
       supervised: supervised(spec)
     )
   end
@@ -111,6 +106,15 @@ defmodule ExUnited do
     |> Enum.reject(fn dep ->
       elem(dep, 0) == :porcelain
     end)
+  end
+
+  defp read_config(name) do
+    if function_exported?(Config.Reader, :read!, 1) do
+      Config.Reader
+    else
+      Mix.Config
+    end
+    |> apply(:read!, [config_exs_path(name)])
   end
 
   @spec supervised(keyword) :: binary

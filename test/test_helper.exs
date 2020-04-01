@@ -10,8 +10,8 @@ defmodule TestHelper do
     end)
   end
 
-  def teardown(spawned) do
-    ExUnited.stop(spawned)
+  def teardown do
+    ExUnited.stop()
 
     "/tmp/*-{config,mix}.exs"
     |> Path.wildcard()

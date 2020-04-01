@@ -16,8 +16,11 @@ defmodule Void.Application do
     Supervisor.start_link(<%= supervised %>, opts)
   end
   defp load_config do
-    <%= inspect(config_exs_path) %>
-    |> Config.Reader.read!()
-    |> Application.put_all_env()
+<%= Regex.replace(~r/^/m, inspect(all_env, pretty: true), "    ") %>
+    |> Enum.each(fn {app, env} ->
+      Enum.each(env, fn {key, value} ->
+        Application.put_env(app, key, value)
+      end)
+    end)
   end
 end

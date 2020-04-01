@@ -16,7 +16,7 @@ defmodule ExUnited.SupervisedTest do
         )
 
       on_exit(fn ->
-        teardown(spawned)
+        teardown()
       end)
 
       spawned
@@ -39,7 +39,7 @@ defmodule ExUnited.SupervisedTest do
              ] = take(spawned, :command)
 
       assert """
-             import Config
+             use Mix.Config
 
              config :void,
                greet: "Hi, my name is FULLNAME"
@@ -59,7 +59,7 @@ defmodule ExUnited.SupervisedTest do
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
                    version: "0.1.0",
-                   elixir: ">= 1.5.0"
+                   elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
                def application do
@@ -75,9 +75,12 @@ defmodule ExUnited.SupervisedTest do
                  Supervisor.start_link([Cristiano], opts)
                end
                defp load_config do
-                 "/tmp/cristiano-config.exs"
-                 |> Config.Reader.read!()
-                 |> Application.put_all_env()
+                 [void: [greet: "Hi, my name is FULLNAME"]]
+                 |> Enum.each(fn {app, env} ->
+                   Enum.each(env, fn {key, value} ->
+                     Application.put_env(app, key, value)
+                   end)
+                 end)
                end
              end
              """ == File.read!("/tmp/cristiano-mix.exs")
@@ -120,7 +123,7 @@ defmodule ExUnited.SupervisedTest do
         )
 
       on_exit(fn ->
-        teardown(spawned)
+        teardown()
       end)
 
       spawned
@@ -156,7 +159,7 @@ defmodule ExUnited.SupervisedTest do
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
                    version: "0.1.0",
-                   elixir: ">= 1.5.0"
+                   elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
                def application do
@@ -179,9 +182,12 @@ defmodule ExUnited.SupervisedTest do
              end]}], opts)
                end
                defp load_config do
-                 "/tmp/roy-config.exs"
-                 |> Config.Reader.read!()
-                 |> Application.put_all_env()
+                 []
+                 |> Enum.each(fn {app, env} ->
+                   Enum.each(env, fn {key, value} ->
+                     Application.put_env(app, key, value)
+                   end)
+                 end)
                end
              end
              """ == File.read!("/tmp/roy-mix.exs")
