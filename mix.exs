@@ -23,7 +23,7 @@ defmodule ExUnited.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :porcelain]
+      extra_applications: [:logger]
     ]
   end
 
@@ -45,8 +45,7 @@ defmodule ExUnited.MixProject do
     [
       {:credo, "~> 1.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.12.3", only: [:dev, :test]},
-      {:porcelain, "~> 2.0"}
+      {:excoveralls, "~> 0.12.3", only: [:dev, :test]}
     ]
   end
 

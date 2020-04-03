@@ -3,10 +3,10 @@ defmodule ExUnited.Node do
 
   @type t :: %__MODULE__{
           node: node,
-          pid: pid,
+          port: port,
           command: binary,
           env: keyword
         }
 
-  defstruct [:node, :pid, :command, env: []]
+  defstruct [:node, :port, :command, env: []]
 end

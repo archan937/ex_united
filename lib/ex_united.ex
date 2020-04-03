@@ -9,11 +9,12 @@ defmodule ExUnited do
                  __ENV__.file
                )
 
-  @excluded_dependencies [:ex_united, :porcelain]
+  @excluded_dependencies [:ex_united]
 
-  alias ExUnited.Node, as: UNoded
+  alias ExUnited.Node, as: ExNode
+  alias ExUnited.Spawn, as: Simmons
 
-  @spec start([node], [atom | keyword]) :: {:ok, [UNoded.t()]}
+  @spec start([node], [atom | keyword]) :: {:ok, [ExNode.t()]}
   def start(nodes, opts \\ []) do
     Node.start(:"#{@nodename}@#{@nodehost}")
 
@@ -36,11 +37,7 @@ defmodule ExUnited do
 
   @spec stop() :: :ok
   def stop do
-    Porcelain.shell(
-      "ps aux | grep iex | grep 'Node.connect(:\"captain@127.0.0.1\")' | grep -v grep | awk '{print $2}' | xargs kill -9"
-    )
-
-    :ok
+    Simmons.kill_all()
   end
 
   @spec generate_files(atom, [atom | keyword], keyword) :: :ok
@@ -139,7 +136,7 @@ defmodule ExUnited do
     end
   end
 
-  @spec spawn_node(atom, [atom]) :: UNoded.t()
+  @spec spawn_node(atom, [atom]) :: ExNode.t()
   defp spawn_node(name, opts) do
     captain = Node.self()
     node = :"#{name}@#{@nodehost}"
@@ -149,20 +146,15 @@ defmodule ExUnited do
         " --erl '-connect_all false'"
       end
 
+    command = ~s[iex --name #{node}#{connect} -S mix run -e 'Node.connect(#{inspect(captain)})']
     env = [MIX_EXS: mix_exs_path(name)]
 
-    out =
-      if Enum.member?(opts, :verbose) do
-        IO.stream(:stdio, :line)
-      end
-
-    command = ~s[iex --name #{node}#{connect} -S mix run -e 'Node.connect(#{inspect(captain)})']
-
-    %{pid: pid} =
-      Porcelain.spawn_shell(
+    port =
+      Simmons.spawn(
+        node,
         command,
         env: env,
-        out: out
+        verbose: Enum.member?(opts, :verbose)
       )
 
     await_node(node)
@@ -175,7 +167,7 @@ defmodule ExUnited do
       end)
     end
 
-    %UNoded{node: node, pid: pid, command: command, env: env}
+    %ExNode{node: node, port: port, command: command, env: env}
   end
 
   @spec await_node(node) :: :ok
