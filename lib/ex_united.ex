@@ -9,7 +9,13 @@ defmodule ExUnited do
                  __ENV__.file
                )
 
-  @excluded_dependencies [:ex_united]
+  @excluded_dependencies [
+    :credo,
+    :dialyxir,
+    :ex_doc,
+    :ex_united,
+    :excoveralls
+  ]
 
   alias ExUnited.Node, as: ExNode
   alias ExUnited.Spawn, as: Simmons

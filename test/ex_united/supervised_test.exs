@@ -50,12 +50,7 @@ defmodule ExUnited.SupervisedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [
-                     {:credo, "~> 1.3", [only: [:credo], runtime: false]},
-                     {:dialyxir, "~> 1.0", [only: [:dialyzer], runtime: false]},
-                     {:excoveralls, "~> 0.12.3", [only: [:test]]},
-                     {:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}
-                   ],
+                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
                    elixirc_paths: ["test/nodes/ronaldo"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
@@ -158,12 +153,7 @@ defmodule ExUnited.SupervisedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [
-                     {:credo, "~> 1.3", [only: [:credo], runtime: false]},
-                     {:dialyxir, "~> 1.0", [only: [:dialyzer], runtime: false]},
-                     {:excoveralls, "~> 0.12.3", [only: [:test]]},
-                     {:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}
-                   ],
+                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
                    elixirc_paths: ["test/nodes/keane"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,

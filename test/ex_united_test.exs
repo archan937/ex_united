@@ -32,12 +32,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [
-                     {:credo, "~> 1.3", [only: [:credo], runtime: false]},
-                     {:dialyxir, "~> 1.0", [only: [:dialyzer], runtime: false]},
-                     {:excoveralls, "~> 0.12.3", [only: [:test]]},
-                     {:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}
-                   ],
+                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
                    elixirc_paths: [],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
@@ -90,7 +85,7 @@ defmodule ExUnitedTest do
 
   describe "dependencies" do
     setup do
-      {:ok, spawned} = ExUnited.spawn([:ryan], exclude: [:credo, :dialyxir])
+      {:ok, spawned} = ExUnited.spawn([:ryan], exclude: [:inch_ex])
 
       on_exit(fn ->
         ExUnited.teardown()
@@ -105,10 +100,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [
-                     {:excoveralls, "~> 0.12.3", [only: [:test]]},
-                     {:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}
-                   ],
+                   deps: [],
                    elixirc_paths: [],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
@@ -218,12 +210,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [
-                     {:credo, "~> 1.3", [only: [:credo], runtime: false]},
-                     {:dialyxir, "~> 1.0", [only: [:dialyzer], runtime: false]},
-                     {:excoveralls, "~> 0.12.3", [only: [:test]]},
-                     {:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}
-                   ],
+                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
                    elixirc_paths: ["test/nodes/cantona"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
@@ -304,12 +291,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [
-                     {:credo, "~> 1.3", [only: [:credo], runtime: false]},
-                     {:dialyxir, "~> 1.0", [only: [:dialyzer], runtime: false]},
-                     {:excoveralls, "~> 0.12.3", [only: [:test]]},
-                     {:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}
-                   ],
+                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
                    elixirc_paths: ["test/nodes/rooney"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
