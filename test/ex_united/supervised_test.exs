@@ -51,9 +51,9 @@ defmodule ExUnited.SupervisedTest do
                def project do
                  [
                    deps: [
-                     {:credo, "~> 1.3", [only: [:dev, :test], runtime: false]},
-                     {:dialyxir, "~> 1.0", [only: [:dev], runtime: false]},
-                     {:excoveralls, "~> 0.12.3", [only: [:dev, :test]]}
+                     {:credo, "~> 1.3", [only: [:credo], runtime: false]},
+                     {:dialyxir, "~> 1.0", [only: [:dialyzer], runtime: false]},
+                     {:excoveralls, "~> 0.12.3", [only: [:test]]}
                    ],
                    elixirc_paths: ["test/nodes/ronaldo"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
@@ -158,9 +158,9 @@ defmodule ExUnited.SupervisedTest do
                def project do
                  [
                    deps: [
-                     {:credo, "~> 1.3", [only: [:dev, :test], runtime: false]},
-                     {:dialyxir, "~> 1.0", [only: [:dev], runtime: false]},
-                     {:excoveralls, "~> 0.12.3", [only: [:dev, :test]]}
+                     {:credo, "~> 1.3", [only: [:credo], runtime: false]},
+                     {:dialyxir, "~> 1.0", [only: [:dialyzer], runtime: false]},
+                     {:excoveralls, "~> 0.12.3", [only: [:test]]}
                    ],
                    elixirc_paths: ["test/nodes/keane"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",

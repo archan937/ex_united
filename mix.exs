@@ -12,6 +12,8 @@ defmodule ExUnited.MixProject do
       deps: deps(),
       dialyzer: dialyzer(),
       preferred_cli_env: [
+        credo: :credo,
+        dialyzer: :dialyzer,
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
@@ -43,9 +45,9 @@ defmodule ExUnited.MixProject do
 
   defp deps do
     [
-      {:credo, "~> 1.3", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.12.3", only: [:dev, :test]}
+      {:credo, "~> 1.3", only: [:credo], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dialyzer], runtime: false},
+      {:excoveralls, "~> 0.12.3", only: [:test]}
     ]
   end
 
