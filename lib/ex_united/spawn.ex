@@ -77,7 +77,10 @@ defmodule ExUnited.Spawn do
       {color, color_index} =
         if Keyword.get(opts, :verbose) do
           color = Enum.at(@color, color_index)
-          color_index = if color_index == length(@color) - 1, do: 0, else: color_index + 1
+
+          color_index =
+            if color_index == length(@color) - 1, do: 0, else: color_index + 1
+
           {color, color_index}
         else
           {nil, color_index}
@@ -117,7 +120,8 @@ defmodule ExUnited.Spawn do
           {:reply, :ok | :noop, State.t()}
   def handle_call(:kill_all, from, %{nodes: nodes} = state) do
     nodes
-    |> Enum.reduce({:reply, :ok, state}, fn {name, _port}, {:reply, result, state} ->
+    |> Enum.reduce({:reply, :ok, state}, fn {name, _port},
+                                            {:reply, result, state} ->
       {reply, new_result, state} = handle_call({:kill, name}, from, state)
       {reply, hd(Enum.sort([result, new_result])), state}
     end)
@@ -131,7 +135,9 @@ defmodule ExUnited.Spawn do
           line = Regex.replace(~r/(^\s+|\s+$)/, line, "")
           IO.puts("\e[38;5;#{color}miex(#{name})>#{IO.ANSI.reset()} #{line}")
         end
-      nil -> :noop
+
+      nil ->
+        :noop
     end
 
     {:noreply, state}

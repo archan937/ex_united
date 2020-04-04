@@ -249,7 +249,8 @@ defmodule ExUnitedTest do
              end
              """ == File.read!("/tmp/eric-mix.exs")
 
-      assert "T'as pigé?" = :rpc.call(eric, Application, :get_env, [:void, :question])
+      assert "T'as pigé?" =
+               :rpc.call(eric, Application, :get_env, [:void, :question])
     end
   end
 

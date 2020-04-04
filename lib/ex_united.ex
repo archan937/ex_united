@@ -44,9 +44,11 @@ defmodule ExUnited do
   @spec teardown() :: :ok
   def teardown do
     Simmons.kill_all()
+
     "/tmp/*-{config,mix}.exs"
     |> Path.wildcard()
     |> Enum.each(&File.rm/1)
+
     :ok
   end
 
@@ -156,7 +158,11 @@ defmodule ExUnited do
         " --erl '-connect_all false'"
       end
 
-    command = ~s[iex --name #{node}#{connect} -S mix run -e 'Node.connect(#{inspect(captain)})']
+    command =
+      ~s[iex --name #{node}#{connect} -S mix run -e 'Node.connect(#{
+        inspect(captain)
+      })']
+
     env = [MIX_EXS: mix_exs_path(name)]
 
     port =

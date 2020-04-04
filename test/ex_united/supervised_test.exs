@@ -88,10 +88,17 @@ defmodule ExUnited.SupervisedTest do
       assert "Hi, my name is FULLNAME" =
                :rpc.call(cristiano, Application, :get_env, [:void, :greet])
 
-      assert "Hi, my name is Cristiano Ronaldo (1)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
-      assert "Hi, my name is Cristiano Ronaldo (2)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
-      assert "Hi, my name is Cristiano Ronaldo (3)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
-      assert "Hi, my name is Cristiano Ronaldo (4)" = :rpc.call(cristiano, Cristiano, :say_hi, [])
+      assert "Hi, my name is Cristiano Ronaldo (1)" =
+               :rpc.call(cristiano, Cristiano, :say_hi, [])
+
+      assert "Hi, my name is Cristiano Ronaldo (2)" =
+               :rpc.call(cristiano, Cristiano, :say_hi, [])
+
+      assert "Hi, my name is Cristiano Ronaldo (3)" =
+               :rpc.call(cristiano, Cristiano, :say_hi, [])
+
+      assert "Hi, my name is Cristiano Ronaldo (4)" =
+               :rpc.call(cristiano, Cristiano, :say_hi, [])
     end
   end
 

@@ -5,7 +5,9 @@ defmodule ExUnited.CaseTest do
 
   setup do
     {:ok, spawned} =
-      ExUnited.spawn(david: [code_paths: ["test/nodes/beckham"], supervise: [David]])
+      ExUnited.spawn(
+        david: [code_paths: ["test/nodes/beckham"], supervise: [David]]
+      )
 
     on_exit(fn ->
       ExUnited.teardown()
@@ -24,7 +26,8 @@ defmodule ExUnited.CaseTest do
 
       refute match?(%{node: ^node}, %{node: :foo})
 
-      assert "The only time you run out of chances is when you stop taking them." = David.talk()
+      assert "The only time you run out of chances is when you stop taking them." =
+               David.talk()
 
       phrase = "Always have something to look forward to."
       assert ^phrase = David.talk()
@@ -48,7 +51,8 @@ defmodule ExUnited.CaseTest do
     rescue
       error ->
         assert %ExUnit.AssertionError{
-                 message: "Assertion with != failed, both sides are exactly equal"
+                 message:
+                   "Assertion with != failed, both sides are exactly equal"
                } = error
     end
   end
