@@ -9,14 +9,6 @@ defmodule TestHelper do
         list
     end)
   end
-
-  def teardown do
-    ExUnited.stop()
-
-    "/tmp/*-{config,mix}.exs"
-    |> Path.wildcard()
-    |> Enum.each(&File.rm/1)
-  end
 end
 
-ExUnit.start()
+ExUnited.start()

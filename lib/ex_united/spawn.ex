@@ -17,76 +17,52 @@ defmodule ExUnited.Spawn do
     36
   )
 
-  @spec spawn(atom, binary, keyword) :: port | :noop
-  def spawn(name, command, opts \\ []) do
-    start_link()
-    summon(name, command, opts)
-  end
-
-  @spec start_link() :: {:ok, pid} | :noop
+  @spec start_link() :: {:ok, pid}
   def start_link do
-    if alive?() do
-      :noop
-    else
-      System.at_exit(fn _ ->
-        # coveralls-ignore-start
-        kill_all()
-        # coveralls-ignore-stop
-      end)
-
-      GenServer.start_link(@spawn, %State{}, name: @spawn)
-    end
-  end
-
-  @spec alive?() :: boolean
-  defp alive? do
-    case GenServer.whereis(@spawn) do
-      nil -> false
-      pid -> Process.alive?(pid)
-    end
+    GenServer.start_link(@spawn, %State{}, name: @spawn)
   end
 
   @spec init(State.t()) :: {:ok, State.t()}
-  def init(state), do: {:ok, state}
+  def init(state) do
+    Process.flag(:trap_exit, true)
+    {:ok, state}
+  end
 
-  @spec summon(atom, binary, keyword) :: port | :noop
-  defp summon(name, command, opts) do
-    GenServer.call(@spawn, {:summon, name, command, opts})
+  @spec terminate(atom, State.t()) :: :ok | :noop
+  def terminate(_reason, state) do
+    handle_call(:kill_all, {self(), nil}, state)
   end
 
   @spec legion() :: State.t()
   def legion do
-    if alive?() do
-      @spawn
-      |> GenServer.whereis()
-      |> :sys.get_state()
-    else
-      :noop
-    end
+    @spawn
+    |> GenServer.whereis()
+    |> :sys.get_state()
+  end
+
+  @spec spawn(atom, binary, keyword) :: port | :noop
+  def spawn(name, command, opts \\ []) do
+    GenServer.call(@spawn, {:spawn, name, command, opts})
   end
 
   @spec kill(atom | port) :: :ok | :noop
   def kill(name_or_port) do
-    if alive?() do
-      GenServer.call(@spawn, {:kill, name_or_port})
-    else
-      :noop
-    end
+    GenServer.call(@spawn, {:kill, name_or_port})
   end
 
-  @spec kill_all() :: :ok
+  @spec kill_all() :: :ok | :noop
   def kill_all do
-    if alive?() do
-      GenServer.call(@spawn, :kill_all)
-    else
-      :noop
-    end
+    GenServer.call(@spawn, :kill_all)
   end
 
-  @spec handle_call({:summon, atom, binary, keyword}, {pid, reference}, State.t()) ::
+  @spec handle_call(
+          {:spawn, atom, binary, keyword},
+          {pid, reference},
+          State.t()
+        ) ::
           {:reply, port | :noop, State.t()}
   def handle_call(
-        {:summon, name, command, opts},
+        {:spawn, name, command, opts},
         _from,
         %{nodes: nodes, color_index: color_index} = state
       ) do
@@ -121,11 +97,15 @@ defmodule ExUnited.Spawn do
       {name, %{port: port}} ->
         state = %{state | nodes: Map.delete(nodes, name)}
 
-        if Port.info(port) do
-          Port.close(port)
-          {:reply, :ok, state}
-        else
-          {:reply, :noop, state}
+        case Port.info(port) do
+          nil ->
+            {:reply, :noop, state}
+
+          info ->
+            Port.close(port)
+            os_pid = Keyword.get(info, :os_pid)
+            :os.cmd(:"kill -9 #{os_pid}")
+            {:reply, :ok, state}
         end
 
       nil ->
@@ -133,7 +113,8 @@ defmodule ExUnited.Spawn do
     end
   end
 
-  @spec handle_call(:kill_all, {pid, reference}, State.t()) :: {:reply, :ok, State.t()}
+  @spec handle_call(:kill_all, {pid, reference}, State.t()) ::
+          {:reply, :ok | :noop, State.t()}
   def handle_call(:kill_all, from, %{nodes: nodes} = state) do
     nodes
     |> Enum.reduce({:reply, :ok, state}, fn {name, _port}, {:reply, result, state} ->
@@ -144,15 +125,20 @@ defmodule ExUnited.Spawn do
 
   @spec handle_info({port, {:data, binary}}, State.t()) :: {:noreply, State.t()}
   def handle_info({port, {:data, line}}, state) do
-    {name, %{color: color}} = find(port, state)
-
-    if color do
-      line = Regex.replace(~r/(^\s+|\s+$)/, line, "")
-      IO.puts("\e[38;5;#{color}miex(#{name})>#{IO.ANSI.reset()} #{line}")
+    case find(port, state) do
+      {name, %{color: color}} ->
+        if color do
+          line = Regex.replace(~r/(^\s+|\s+$)/, line, "")
+          IO.puts("\e[38;5;#{color}miex(#{name})>#{IO.ANSI.reset()} #{line}")
+        end
+      nil -> :noop
     end
 
     {:noreply, state}
   end
+
+  @spec handle_info(tuple, State.t()) :: {:noreply, State.t()}
+  def handle_info(_message, state), do: {:noreply, state}
 
   @spec to_erlang_env(keyword) :: [{charlist, charlist}]
   defp to_erlang_env(env) do

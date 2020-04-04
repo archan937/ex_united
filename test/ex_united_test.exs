@@ -5,10 +5,10 @@ defmodule ExUnitedTest do
 
   describe "zero-config" do
     setup do
-      {:ok, spawned} = ExUnited.start([:ryan, :george, :bobby])
+      {:ok, spawned} = ExUnited.spawn([:ryan, :george, :bobby])
 
       on_exit(fn ->
-        teardown()
+        ExUnited.teardown()
       end)
 
       spawned
@@ -89,10 +89,10 @@ defmodule ExUnitedTest do
 
   describe "dependencies" do
     setup do
-      {:ok, spawned} = ExUnited.start([:ryan], exclude: [:credo, :dialyxir])
+      {:ok, spawned} = ExUnited.spawn([:ryan], exclude: [:credo, :dialyxir])
 
       on_exit(fn ->
-        teardown()
+        ExUnited.teardown()
       end)
 
       spawned
@@ -139,10 +139,10 @@ defmodule ExUnitedTest do
 
   describe "fully connected" do
     setup do
-      {:ok, spawned} = ExUnited.start([:denis, :paul, :duncan], [:connect])
+      {:ok, spawned} = ExUnited.spawn([:denis, :paul, :duncan], [:connect])
 
       on_exit(fn ->
-        teardown()
+        ExUnited.teardown()
       end)
 
       spawned
@@ -171,7 +171,7 @@ defmodule ExUnitedTest do
   describe "configured" do
     setup do
       {:ok, spawned} =
-        ExUnited.start(
+        ExUnited.spawn(
           eric: [
             code_paths: [
               "test/nodes/cantona"
@@ -180,7 +180,7 @@ defmodule ExUnitedTest do
         )
 
       on_exit(fn ->
-        teardown()
+        ExUnited.teardown()
       end)
 
       spawned
@@ -256,7 +256,7 @@ defmodule ExUnitedTest do
   describe "code paths" do
     setup do
       {:ok, spawned} =
-        ExUnited.start(
+        ExUnited.spawn(
           wayne: [
             code_paths: [
               "test/nodes/rooney"
@@ -265,7 +265,7 @@ defmodule ExUnitedTest do
         )
 
       on_exit(fn ->
-        teardown()
+        ExUnited.teardown()
       end)
 
       spawned

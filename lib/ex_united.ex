@@ -14,8 +14,14 @@ defmodule ExUnited do
   alias ExUnited.Node, as: ExNode
   alias ExUnited.Spawn, as: Simmons
 
-  @spec start([node], [atom | keyword]) :: {:ok, [ExNode.t()]}
-  def start(nodes, opts \\ []) do
+  @spec start() :: {:ok, pid}
+  def start do
+    ExUnit.start()
+    Simmons.start_link()
+  end
+
+  @spec spawn([node], [atom | keyword]) :: {:ok, [ExNode.t()]}
+  def spawn(nodes, opts \\ []) do
     Node.start(:"#{@nodename}@#{@nodehost}")
 
     spawned =
@@ -35,9 +41,13 @@ defmodule ExUnited do
     {:ok, spawned}
   end
 
-  @spec stop() :: :ok
-  def stop do
+  @spec teardown() :: :ok
+  def teardown do
     Simmons.kill_all()
+    "/tmp/*-{config,mix}.exs"
+    |> Path.wildcard()
+    |> Enum.each(&File.rm/1)
+    :ok
   end
 
   @spec generate_files(atom, [atom | keyword], keyword) :: :ok

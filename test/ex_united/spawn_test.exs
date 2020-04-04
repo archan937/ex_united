@@ -7,10 +7,10 @@ defmodule ExUnited.SpawnTest do
   alias ExUnited.Spawn.State
 
   setup do
-    {:ok, spawned} = ExUnited.start([:ryan, :david, :wayne])
+    {:ok, spawned} = ExUnited.spawn([:ryan, :david, :wayne])
 
     on_exit(fn ->
-      teardown()
+      ExUnited.teardown()
     end)
 
     spawned
@@ -29,8 +29,7 @@ defmodule ExUnited.SpawnTest do
                :"ryan@127.0.0.1" => %{port: _},
                :"david@127.0.0.1" => %{port: _},
                :"wayne@127.0.0.1" => %{port: _}
-             },
-             color_index: 0
+             }
            } = Simmons.legion()
   end
 

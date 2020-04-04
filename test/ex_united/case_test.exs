@@ -5,10 +5,10 @@ defmodule ExUnited.CaseTest do
 
   setup do
     {:ok, spawned} =
-      ExUnited.start(david: [code_paths: ["test/nodes/beckham"], supervise: [David]])
+      ExUnited.spawn(david: [code_paths: ["test/nodes/beckham"], supervise: [David]])
 
     on_exit(fn ->
-      teardown()
+      ExUnited.teardown()
     end)
 
     spawned

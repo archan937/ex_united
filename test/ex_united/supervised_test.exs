@@ -6,7 +6,7 @@ defmodule ExUnited.SupervisedTest do
   describe "supervised" do
     setup do
       {:ok, spawned} =
-        ExUnited.start(
+        ExUnited.spawn(
           cristiano: [
             code_paths: [
               "test/nodes/ronaldo"
@@ -16,7 +16,7 @@ defmodule ExUnited.SupervisedTest do
         )
 
       on_exit(fn ->
-        teardown()
+        ExUnited.teardown()
       end)
 
       spawned
@@ -98,7 +98,7 @@ defmodule ExUnited.SupervisedTest do
   describe "supervised with a dynamic config" do
     setup do
       {:ok, spawned} =
-        ExUnited.start(
+        ExUnited.spawn(
           [
             roy: [
               code_paths: [
@@ -123,7 +123,7 @@ defmodule ExUnited.SupervisedTest do
         )
 
       on_exit(fn ->
-        teardown()
+        ExUnited.teardown()
       end)
 
       spawned
