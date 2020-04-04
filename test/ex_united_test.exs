@@ -16,9 +16,9 @@ defmodule ExUnitedTest do
 
     test "generates config and mix files", spawned do
       assert [
-               [MIX_EXS: "/tmp/bobby-mix.exs"],
-               [MIX_EXS: "/tmp/george-mix.exs"],
-               [MIX_EXS: "/tmp/ryan-mix.exs"]
+               [{'MIX_EXS', '/tmp/bobby-mix.exs'}],
+               [{'MIX_EXS', '/tmp/george-mix.exs'}],
+               [{'MIX_EXS', '/tmp/ryan-mix.exs'}]
              ] = take(spawned, :env)
 
       assert """

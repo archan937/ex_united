@@ -156,49 +156,16 @@ defmodule ExUnited do
 
   @spec spawn_node(atom, [atom]) :: ExNode.t()
   defp spawn_node(name, opts) do
-    captain = Node.self()
     node = :"#{name}@#{@nodehost}"
 
-    connect =
-      unless Enum.member?(opts, :connect) do
-        " --erl '-connect_all false'"
-      end
-
-    command =
-      ~s[iex --name #{node}#{connect} -S mix run -e 'Node.connect(#{
-        inspect(captain)
-      })']
-
-    env = [MIX_EXS: mix_exs_path(name)]
-
-    port =
+    {port, command, env} =
       Simmons.spawn(
         node,
-        command,
-        env: env,
+        env: [MIX_EXS: mix_exs_path(name)],
+        connect: Enum.member?(opts, :connect),
         verbose: Enum.member?(opts, :verbose)
       )
 
-    await_node(node)
-
-    if Enum.member?(opts, :connect) do
-      [last | others] = Node.list() |> Enum.reverse()
-
-      Enum.each(others, fn node ->
-        :rpc.call(last, Node, :connect, [node])
-      end)
-    end
-
     %ExNode{node: node, port: port, command: command, env: env}
-  end
-
-  @spec await_node(node) :: :ok
-  defp await_node(node) do
-    unless Enum.member?(Node.list(), node) do
-      Process.sleep(100)
-      await_node(node)
-    end
-
-    :ok
   end
 end

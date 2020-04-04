@@ -45,14 +45,15 @@ defmodule ExUnited.Spawn do
     |> :sys.get_state()
   end
 
-  @spec spawn(atom, binary, keyword) :: port | :noop
-  def spawn(name, command, opts \\ []) do
-    GenServer.call(@spawn, {:spawn, name, command, opts})
+  @spec spawn(node, keyword) ::
+          {port, binary, [{charlist, charlist}]} | :noop
+  def spawn(node, opts \\ []) do
+    GenServer.call(@spawn, {:spawn, node, opts})
   end
 
-  @spec kill(atom | port) :: :ok | :noop
-  def kill(name_or_port) do
-    GenServer.call(@spawn, {:kill, name_or_port})
+  @spec kill(node | port) :: :ok | :noop
+  def kill(node_or_port) do
+    GenServer.call(@spawn, {:kill, node_or_port})
   end
 
   @spec kill_all() :: :ok | :noop
@@ -61,49 +62,61 @@ defmodule ExUnited.Spawn do
   end
 
   @spec handle_call(
-          {:spawn, atom, binary, keyword},
+          {:spawn, node, keyword},
           {pid, reference},
           State.t()
         ) ::
-          {:reply, port | :noop, State.t()}
+          {:reply, {port, binary, [{charlist, charlist}]} | :noop, State.t()}
   def handle_call(
-        {:spawn, name, command, opts},
+        {:spawn, node, opts},
         _from,
-        %{nodes: nodes, color_index: color_index} = state
+        %{nodes: nodes, color_index: index} = state
       ) do
-    if find(name, state) do
+    if find(node, state) do
       {:reply, :noop, state}
     else
+      connect =
+        unless Keyword.get(opts, :connect) do
+          " --erl '-connect_all false'"
+        end
+
+      command =
+        ~s[iex --name #{node}#{connect} -S mix run -e 'Node.connect(#{
+          inspect(Node.self())
+        })']
+
       env =
         opts
         |> Keyword.get(:env, [])
         |> to_erlang_env()
 
-      {color, color_index} =
+      {color, index} =
         if Keyword.get(opts, :verbose) do
-          color = Enum.at(@color, color_index)
+          color = Enum.at(@color, index)
 
-          color_index =
-            if color_index == length(@color) - 1, do: 0, else: color_index + 1
+          index = if index == length(@color) - 1, do: 0, else: index + 1
 
-          {color, color_index}
+          {color, index}
         else
-          {nil, color_index}
+          {nil, index}
         end
 
       port = Port.open({:spawn, command}, [:binary, env: env])
-      nodes = Map.put(nodes, name, %{port: port, color: color})
+      nodes = Map.put(nodes, node, %{port: port, color: color})
 
-      {:reply, port, %{state | nodes: nodes, color_index: color_index}}
+      await_node(node, Keyword.get(opts, :connect))
+
+      {:reply, {port, command, env},
+       %{state | nodes: nodes, color_index: index}}
     end
   end
 
-  @spec handle_call({:kill, atom | port}, {pid, reference}, State.t()) ::
+  @spec handle_call({:kill, node | port}, {pid, reference}, State.t()) ::
           {:reply, :ok | :noop, State.t()}
-  def handle_call({:kill, name_or_port}, _from, %{nodes: nodes} = state) do
-    case find(name_or_port, state) do
-      {name, %{port: port}} ->
-        state = %{state | nodes: Map.delete(nodes, name)}
+  def handle_call({:kill, node_or_port}, _from, %{nodes: nodes} = state) do
+    case find(node_or_port, state) do
+      {node, %{port: port}} ->
+        state = %{state | nodes: Map.delete(nodes, node)}
 
         case Port.info(port) do
           nil ->
@@ -125,9 +138,9 @@ defmodule ExUnited.Spawn do
           {:reply, :ok | :noop, State.t()}
   def handle_call(:kill_all, from, %{nodes: nodes} = state) do
     nodes
-    |> Enum.reduce({:reply, :ok, state}, fn {name, _port},
+    |> Enum.reduce({:reply, :ok, state}, fn {node, _port},
                                             {:reply, result, state} ->
-      {reply, new_result, state} = handle_call({:kill, name}, from, state)
+      {reply, new_result, state} = handle_call({:kill, node}, from, state)
       {reply, hd(Enum.sort([result, new_result])), state}
     end)
   end
@@ -135,10 +148,10 @@ defmodule ExUnited.Spawn do
   @spec handle_info({port, {:data, binary}}, State.t()) :: {:noreply, State.t()}
   def handle_info({port, {:data, line}}, state) do
     case find(port, state) do
-      {name, %{color: color}} ->
+      {node, %{color: color}} ->
         if color do
           line = Regex.replace(~r/(^\s+|\s+$)/, line, "")
-          IO.puts("\e[38;5;#{color}miex(#{name})>#{IO.ANSI.reset()} #{line}")
+          IO.puts("\e[38;5;#{color}miex(#{node})>#{IO.ANSI.reset()} #{line}")
         end
 
       nil ->
@@ -157,10 +170,28 @@ defmodule ExUnited.Spawn do
     end)
   end
 
-  @spec find(atom | port, State.t()) :: {atom, map} | nil
-  defp find(name_or_port, %{nodes: nodes}) do
-    Enum.find(nodes, fn {name, %{port: port}} ->
-      Enum.member?([name, port], name_or_port)
+  @spec await_node(node, boolean) :: :ok
+  defp await_node(node, connect) do
+    if Enum.member?(Node.list(), node) do
+      if connect do
+        [last | others] = Node.list() |> Enum.reverse()
+
+        Enum.each(others, fn node ->
+          :rpc.call(last, Node, :connect, [node])
+        end)
+      end
+    else
+      Process.sleep(100)
+      await_node(node, connect)
+    end
+
+    :ok
+  end
+
+  @spec find(node | port, State.t()) :: {node, map} | nil
+  defp find(node_or_port, %{nodes: nodes}) do
+    Enum.find(nodes, fn {node, %{port: port}} ->
+      Enum.member?([node, port], node_or_port)
     end)
   end
 end
