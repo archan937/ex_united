@@ -16,7 +16,9 @@ defmodule ExUnited.MixProject do
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
-        "coveralls.html": :test
+        "coveralls.html": :test,
+        inch: :inch,
+        "inch.report": :inch
       ],
       test_coverage: [tool: ExCoveralls]
     ]
@@ -32,7 +34,8 @@ defmodule ExUnited.MixProject do
     [
       {:credo, "~> 1.3", only: [:credo], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dialyzer], runtime: false},
-      {:excoveralls, "~> 0.12.3", only: [:test]}
+      {:excoveralls, "~> 0.12.3", only: [:test]},
+      {:inch_ex, "~> 2.0", only: [:inch], runtime: false}
     ]
   end
 

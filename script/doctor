@@ -4,3 +4,4 @@ mix format
 mix dialyzer
 mix coveralls
 mix credo --strict
+mix inch --strict
