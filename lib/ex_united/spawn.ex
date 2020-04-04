@@ -30,7 +30,12 @@ defmodule ExUnited.Spawn do
 
   @spec terminate(atom, State.t()) :: :ok | :noop
   def terminate(_reason, state) do
-    handle_call(:kill_all, {self(), nil}, state)
+    # coveralls-ignore-start
+    {:reply, status, _state} =
+      handle_call(:kill_all, {self(), make_ref()}, state)
+
+    status
+    # coveralls-ignore-stop
   end
 
   @spec legion() :: State.t()
@@ -107,7 +112,7 @@ defmodule ExUnited.Spawn do
           info ->
             Port.close(port)
             os_pid = Keyword.get(info, :os_pid)
-            :os.cmd(:"kill -9 #{os_pid}")
+            System.cmd("kill", ["-9", "#{os_pid}"])
             {:reply, :ok, state}
         end
 
@@ -143,7 +148,6 @@ defmodule ExUnited.Spawn do
     {:noreply, state}
   end
 
-  @spec handle_info(tuple, State.t()) :: {:noreply, State.t()}
   def handle_info(_message, state), do: {:noreply, state}
 
   @spec to_erlang_env(keyword) :: [{charlist, charlist}]

@@ -52,7 +52,7 @@ defmodule ExUnited.MixProject do
   defp dialyzer do
     [
       plt_file: {:no_warn, ".ex_united.plt"},
-      plt_add_apps: [:mix, :eex],
+      plt_add_apps: [:mix, :ex_unit, :eex],
       ignore_warnings: ".dialyzer-ignore.exs"
     ]
   end
