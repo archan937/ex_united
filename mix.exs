@@ -8,7 +8,6 @@ defmodule ExUnited.MixProject do
       elixir: ">= 1.6.0",
       elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
-      aliases: aliases(),
       deps: deps(),
       dialyzer: dialyzer(),
       preferred_cli_env: [
@@ -26,20 +25,6 @@ defmodule ExUnited.MixProject do
   def application do
     [
       extra_applications: [:logger]
-    ]
-  end
-
-  defp aliases do
-    [
-      doctor: [
-        "format",
-        "credo --strict",
-        "dialyzer",
-        fn _ ->
-          Mix.env(:test)
-          Mix.Task.run("coveralls", [])
-        end
-      ]
     ]
   end
 

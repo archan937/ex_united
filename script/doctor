@@ -1,0 +1,6 @@
+#!/bin/bash
+
+mix format
+mix dialyzer
+mix coveralls
+mix credo --strict
