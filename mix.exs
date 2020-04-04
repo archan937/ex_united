@@ -10,9 +10,16 @@ defmodule ExUnited.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: dialyzer(),
+      name: "ExUnited",
+      source_url: "https://github.com/archan937/ex_united",
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ],
       preferred_cli_env: [
         credo: :credo,
         dialyzer: :dialyzer,
+        docs: :docs,
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
@@ -34,6 +41,7 @@ defmodule ExUnited.MixProject do
     [
       {:credo, "~> 1.3", only: [:credo], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dialyzer], runtime: false},
+      {:ex_doc, "~> 0.21", only: [:docs], runtime: false},
       {:excoveralls, "~> 0.12.3", only: [:test]},
       {:inch_ex, "~> 2.0", only: [:inch], runtime: false}
     ]
