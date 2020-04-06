@@ -1,8 +1,7 @@
 defmodule ExUnited do
-  @moduledoc false
-
-  @nodename :captain
-  @nodehost '127.0.0.1'
+  @moduledoc """
+  TODO
+  """
 
   @emptyconfig Path.expand(
                  "../ex_united/config.exs",
@@ -20,16 +19,25 @@ defmodule ExUnited do
   alias ExUnited.Node, as: ExNode
   alias ExUnited.Spawn, as: Simmons
 
+  @doc """
+  Starts both the `ExUnit` and `ExUnited.Spawn` gen servers. This should replace
+  the default `ExUnit.start()` invocation in the test helper file.
+
+      # test/test_helper.exs
+      ExUnited.start()
+
+  """
   @spec start() :: {:ok, pid}
   def start do
     ExUnit.start()
     Simmons.start_link()
   end
 
+  @doc """
+  TODO
+  """
   @spec spawn([node], [atom | keyword]) :: {:ok, [ExNode.t()]}
   def spawn(nodes, opts \\ []) do
-    Node.start(:"#{@nodename}@#{@nodehost}")
-
     spawned =
       nodes
       |> Enum.map(fn node ->
@@ -47,6 +55,31 @@ defmodule ExUnited do
     {:ok, spawned}
   end
 
+  @doc """
+  Should be invoked at the end of a test which spawned nodes. This kills the
+  nodes and it also cleans up their generated files located in
+  `/tmp/[NODENAME]-{config,mix}.exs`.
+
+  ## Example
+
+      defmodule MyNodesTest do
+        use ExUnit.Case
+
+        setup do
+          {:ok, spawned} = ExUnited.spawn([:bruce, :clark])
+
+          on_exit(fn ->
+            ExUnited.teardown()
+          end)
+
+          spawned
+        end
+
+        test "does awesome stuff with spawned nodes", spawned do
+          # a lot of awesome assertions and refutations
+        end
+      end
+  """
   @spec teardown() :: :ok
   def teardown do
     Simmons.kill_all()
@@ -156,11 +189,9 @@ defmodule ExUnited do
 
   @spec spawn_node(atom, [atom]) :: ExNode.t()
   defp spawn_node(name, opts) do
-    node = :"#{name}@#{@nodehost}"
-
-    {port, command, env} =
-      Simmons.spawn(
-        node,
+    {node, port, command, env} =
+      Simmons.summon(
+        name,
         env: [MIX_EXS: mix_exs_path(name)],
         connect: Enum.member?(opts, :connect),
         verbose: Enum.member?(opts, :verbose)

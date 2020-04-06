@@ -1,21 +1,19 @@
 defmodule ExUnited.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :ex_united,
-      version: "0.1.0",
+      version: @version,
       elixir: ">= 1.6.0",
       elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: dialyzer(),
+      docs: docs(),
       name: "ExUnited",
-      source_url: "https://github.com/archan937/ex_united",
-      docs: [
-        main: "readme",
-        extras: ["README.md"]
-      ],
       preferred_cli_env: [
         credo: :credo,
         dialyzer: :dialyzer,
@@ -52,6 +50,24 @@ defmodule ExUnited.MixProject do
       plt_file: {:no_warn, ".ex_united.plt"},
       plt_add_apps: [:mix, :ex_unit, :eex],
       ignore_warnings: ".dialyzer-ignore.exs"
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: [
+        "README.md",
+        "CHANGELOG.md"
+      ],
+      source_ref: "v#{@version}",
+      source_url: "https://github.com/archan937/ex_united",
+      groups_for_modules: [
+        Types: [
+          ExUnited.Node,
+          ExUnited.Spawn.State
+        ]
+      ]
     ]
   end
 end

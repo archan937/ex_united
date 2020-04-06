@@ -19,7 +19,7 @@ defmodule ExUnited.CaseTest do
   test "executes code in spawned node", spawned do
     [david] = take(spawned, :node)
 
-    ex_node(david, node: david) do
+    as_node(david, node: david) do
       refute :"captain@127.0.0.1" == Node.self()
       assert :"david@127.0.0.1" = Node.self()
       assert ^node = Node.self()
@@ -38,14 +38,14 @@ defmodule ExUnited.CaseTest do
       assert "I don't do anything unless I can give it 100%." = phrase
     end
 
-    ex_node(david, spawned_node: david) do
+    as_node(david, spawned_node: david) do
       assert :"david@127.0.0.1" = Node.self()
       assert :"david@127.0.0.1" = spawned_node
       assert ^spawned_node = Node.self()
     end
 
     try do
-      ex_node(david, spawned_node: david) do
+      as_node(david, spawned_node: david) do
         assert spawned_node != Node.self()
       end
     rescue
