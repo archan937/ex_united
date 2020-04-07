@@ -4,4 +4,6 @@ mix format
 mix dialyzer
 mix coveralls
 mix credo --strict
-mix inch --strict
+
+# Excluded because Inch does not recognize @typedocs and @docs for macros
+# mix inch --strict
