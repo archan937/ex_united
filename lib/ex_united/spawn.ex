@@ -13,21 +13,26 @@ defmodule ExUnited.Spawn do
 
       iex(1)> ExUnited.Spawn.start_link()
       {:ok, #PID<0.198.0>}
+
       iex(2)> Node.start(:"captain@127.0.0.1")
       {:ok, #PID<0.200.0>}
+
       iex(captain@127.0.0.1)3> ExUnited.Spawn.summon(:"bruce@127.0.0.1", env: [PORT: 5000], verbose: true)
       iex(bruce@127.0.0.1)> Interactive Elixir (1.10.1) - press Ctrl+C to exit (type h() ENTER for help)
       iex(bruce@127.0.0.1)> iex(bruce@127.0.0.1)1>
       {#Port<0.8>,
        "iex --name bruce@127.0.0.1 --erl '-connect_all false' -S mix run -e 'Node.connect(:\"captain@127.0.0.1\")'",
        [{'PORT', '5000'}]}
+
       iex(captain@127.0.0.1)4> Node.list()
       [:"bruce@127.0.0.1"]
+
       iex(captain@127.0.0.1)5> ExUnited.Spawn.legion()
       %ExUnited.Spawn.State{
         color_index: 1,
         nodes: %{bruce: %{color: "38", node: :"bruce@127.0.0.1", port: #Port<0.8>}}
       }
+
       iex(captain@127.0.0.1)6> ExUnited.Spawn.kill_all()
       :ok
   """

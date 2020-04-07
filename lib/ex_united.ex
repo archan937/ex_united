@@ -34,9 +34,113 @@ defmodule ExUnited do
   end
 
   @doc """
-  TODO
+  Spawns nodes for testing purposes. Supervised applications are supported.
+
+  Nodes can be either specified as a list of atoms (as `[:bruce, :clark]` for
+  instance) or as a keyword list (in case of configuring the spawned node).
+
+  The following options are available to configure nodes:
+
+    * `:code_paths` - a list of directories that will be included (please note
+      that the file called `config.exs` is supported for `Mix.Config`)
+    * `:supervise` - the child spec(s) used for supervisioning
+
+  Aside from options for configuring individual nodes, as a second argument, you
+  can pass a list of atoms for the following:
+
+    * `:connect` - if `true` a "fully connected" node will be spawned (see
+      the `erl -connect_all` flag for more information). Defaults to `false`
+    * `:verbose` - if `true` the STDOUT of the spawned node will be printed.
+      Defaults to `false`
+
+  ## Examples
+
+  The most simplest setup:
+
+      setup do
+        {:ok, spawned} = ExUnited.spawn([:bruce, :clark])
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
+
+  Spawn "fully connected" nodes and print all their STDOUT in the console:
+
+      setup do
+        {:ok, spawned} = ExUnited.spawn([:bruce, :clark], [:connect, :verbose])
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
+
+  A configured nodes setup:
+
+      setup do
+        {:ok, spawned} =
+          ExUnited.spawn(
+            bruce: [
+              code_paths: [
+                "test/nodes/bruce"
+              ],
+              supervise: [MyAwesomeGenServer]
+            ],
+            clark: [
+              code_paths: [
+                "test/nodes/clark"
+              ],
+              supervise: [MyOtherAwesomeGenServer]
+            ]
+          )
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
+
+  Also note that functions within childspecs should be quoted.
+
+      setup do
+        {:ok, spawned} =
+          ExUnited.spawn(
+            [
+              roy: [
+                code_paths: [
+                  "test/nodes/keane"
+                ],
+                supervise: [
+                  {
+                    Roy,
+                    talk:
+                      quote do
+                        fn
+                          1 -> "Hi, I am Roy Keane"
+                          2 -> "I am keen as mustard"
+                          3 -> "I like to be peachy keen"
+                        end
+                      end
+                  }
+                ]
+              ]
+            ],
+            [:verbose]
+          )
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
   """
-  @spec spawn([node], [atom | keyword]) :: {:ok, [ExNode.t()]}
+  @spec spawn([node] | [{node, keyword}], [atom]) :: {:ok, [ExNode.t()]}
   def spawn(nodes, opts \\ []) do
     spawned =
       nodes
