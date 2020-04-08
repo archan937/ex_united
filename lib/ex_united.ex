@@ -36,8 +36,9 @@ defmodule ExUnited do
   @doc """
   Spawns nodes for testing purposes. Supervised applications are supported.
 
-  Nodes can be either specified as a list of atoms (as `[:bruce, :clark]` for
-  instance) or as a keyword list (in case of configuring the spawned node).
+  Nodes can be either specified as a list of atoms (such as `[:bruce, :clark]` for
+  instance; the node names will be `:"bruce@127.0.0.1"` and `:"clark@127.0.0.1"`
+  respectively) or as a keyword list (in case of configuring the spawned node).
 
   The following options are available to configure nodes:
 
@@ -52,6 +53,18 @@ defmodule ExUnited do
       the `erl -connect_all` flag for more information). Defaults to `false`
     * `:verbose` - if `true` the STDOUT of the spawned node will be printed.
       Defaults to `false`
+
+  And last but not least, you can exclude certain (Mix) dependencies from your
+  spawned nodes by adding `exclude: [:inch_ex]` to the options. This can
+  significantly improve the speed of your tests.
+
+  The following dependencies are excluded by default:
+
+  * `:credo`
+  * `:dialyxir`
+  * `:ex_doc`
+  * `:ex_united`
+  * `:excoveralls`
 
   ## Examples
 
@@ -71,6 +84,18 @@ defmodule ExUnited do
 
       setup do
         {:ok, spawned} = ExUnited.spawn([:bruce, :clark], [:connect, :verbose])
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
+
+  Exclude certain dependencies:
+
+      setup do
+        {:ok, spawned} = ExUnited.spawn([:bruce, :clark], [:verbose, exclude: [:inch_ex]])
 
         on_exit(fn ->
           ExUnited.teardown()
