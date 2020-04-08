@@ -50,7 +50,7 @@ defmodule ExUnited.SupervisedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
+                   deps: [{:inch_ex, "~> 2.0", [only: :inch, runtime: false]}],
                    elixirc_paths: ["test/nodes/ronaldo"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
@@ -153,7 +153,7 @@ defmodule ExUnited.SupervisedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
+                   deps: [{:inch_ex, "~> 2.0", [only: :inch, runtime: false]}],
                    elixirc_paths: ["test/nodes/keane"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,

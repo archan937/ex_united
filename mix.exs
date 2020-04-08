@@ -37,11 +37,11 @@ defmodule ExUnited.MixProject do
 
   defp deps do
     [
-      {:credo, "~> 1.3", only: [:credo], runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dialyzer], runtime: false},
-      {:ex_doc, "~> 0.21", only: [:docs], runtime: false},
-      {:excoveralls, "~> 0.12.3", only: [:test]},
-      {:inch_ex, "~> 2.0", only: [:inch], runtime: false}
+      {:credo, "~> 1.3", only: :credo, runtime: false},
+      {:dialyxir, "~> 1.0", only: :dialyzer, runtime: false},
+      {:ex_doc, "~> 0.21", only: :docs, runtime: false},
+      {:excoveralls, "~> 0.12.3", only: :test},
+      {:inch_ex, "~> 2.0", only: :inch, runtime: false}
     ]
   end
 

@@ -32,7 +32,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
+                   deps: [{:inch_ex, "~> 2.0", [only: :inch, runtime: false]}],
                    elixirc_paths: [],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
@@ -210,7 +210,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
+                   deps: [{:inch_ex, "~> 2.0", [only: :inch, runtime: false]}],
                    elixirc_paths: ["test/nodes/cantona"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
@@ -291,7 +291,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [{:inch_ex, "~> 2.0", [only: [:inch], runtime: false]}],
+                   deps: [{:inch_ex, "~> 2.0", [only: :inch, runtime: false]}],
                    elixirc_paths: ["test/nodes/rooney"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
