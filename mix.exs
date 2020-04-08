@@ -10,6 +10,8 @@ defmodule ExUnited.MixProject do
       elixir: ">= 1.6.0",
       elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
       deps: deps(),
       dialyzer: dialyzer(),
       docs: docs(),
@@ -32,6 +34,20 @@ defmodule ExUnited.MixProject do
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  defp description do
+    """
+    Easily spawn Elixir nodes (supervising, Mix configured, easy asserted / refuted) within ExUnit tests
+    """
+  end
+
+  defp package do
+    [
+      maintainers: ["Paul Engel"],
+      licenses: ["MIT"],
+      links: %{github: "https://github.com/archan937/ex_united"}
     ]
   end
 

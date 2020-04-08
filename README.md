@@ -1,6 +1,6 @@
 # ExUnited [![Build Status](https://secure.travis-ci.org/archan937/ex_united.png)](http://travis-ci.org/archan937/ex_united)
 
-Easily spin up (supervising) Elixir nodes within ExUnit tests
+Easily spawn Elixir nodes (supervising, Mix configured, easy asserted / refuted) within ExUnit tests
 
 ## Introduction
 
@@ -244,7 +244,7 @@ Pay attention that functions within childspecs should be quoted.
   end
   ```
 
-## Easily assert and refute within the context of spawned nodes
+### Easily assert and refute within the context of spawned nodes
 
 To seemlessly execute assertions and refutations within spawned nodes, you can
 setup your test module by either using `ExUnited.Case` instead of `ExUnit.Case`:
