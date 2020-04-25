@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.1
+
+  * Add `:exclude` option for individual spawned nodes
+  * Exclude current project as dependency (instead, add "lib" to code paths)
+  * Do not generate config files
+  * Fix redundant prompt when in verbose mode
+
 ## v0.1.0
 
   * Initial commit
