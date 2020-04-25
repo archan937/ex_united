@@ -19,7 +19,7 @@ defmodule ExUnited.Spawn do
 
       iex(captain@127.0.0.1)3> ExUnited.Spawn.summon(:"bruce@127.0.0.1", env: [PORT: 5000], verbose: true)
       iex(bruce@127.0.0.1)> Interactive Elixir (1.10.1) - press Ctrl+C to exit (type h() ENTER for help)
-      iex(bruce@127.0.0.1)> iex(bruce@127.0.0.1)1>
+      iex(bruce@127.0.0.1)1>
       {#Port<0.8>,
        "iex --name bruce@127.0.0.1 --erl '-connect_all false' -S mix run -e 'Node.connect(:\"captain@127.0.0.1\")'",
        [{'PORT', '5000'}]}
@@ -256,8 +256,8 @@ defmodule ExUnited.Spawn do
     case find(port, state) do
       {_name, %{node: node, color: color}} ->
         if color do
-          line = Regex.replace(~r/(^\s+|\s+$)/, line, "")
-          IO.puts("\e[38;5;#{color}miex(#{node})>#{IO.ANSI.reset()} #{line}")
+          {prompt, line} = derive_prompt(node, line)
+          IO.puts("\e[38;5;#{color}m#{prompt}#{IO.ANSI.reset()} #{line}")
         end
 
       nil ->
@@ -299,5 +299,18 @@ defmodule ExUnited.Spawn do
     Enum.find(nodes, fn {name, %{port: port}} ->
       Enum.member?([name, port], name_or_port)
     end)
+  end
+
+  @spec derive_prompt(node, binary) :: {binary, binary}
+  defp derive_prompt(node, line) do
+    regex = ~r/^\s*(?<prompt>iex.*?\)\d+>)?(?<line>.*?)\s*$/
+
+    case Regex.named_captures(regex, line) do
+      # coveralls-ignore-start
+      nil -> {"iex(#{node})>", line}
+      # coveralls-ignore-stop
+      %{"prompt" => "", "line" => line} -> {"iex(#{node})>", line}
+      %{"prompt" => prompt, "line" => line} -> {prompt, line}
+    end
   end
 end

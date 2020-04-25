@@ -56,7 +56,7 @@ defmodule ExUnited do
       iex(roy@127.0.0.1)> Compiling 1 file (.ex)
       iex(roy@127.0.0.1)> Generated void app
       iex(roy@127.0.0.1)> Interactive Elixir (1.10.1) - press Ctrl+C to exit (type h() ENTER for help)
-      iex(roy@127.0.0.1)> iex(roy@127.0.0.1)1>
+      iex(roy@127.0.0.1)1>
       .
 
       Finished in 0.9 seconds
