@@ -92,6 +92,7 @@ defmodule ExUnited do
   case you want to configure them. The following options are available:
 
   * `:code_paths` - a list of directories that will be included
+  * `:exclude` - a list of dependencies that will be excluded
   * `:supervise` - the child spec(s) used for supervisioning
 
   ### Including additional code
@@ -120,6 +121,37 @@ defmodule ExUnited do
   See [test/ex_united/supervised_test.exs](https://github.com/archan937/ex_united/blob/v0.1.0/test/ex_united/supervised_test.exs#L7)
   with its corresponding [test/nodes/ronaldo](https://github.com/archan937/ex_united/tree/v0.1.0/test/nodes/ronaldo)
   as an example.
+
+  ### Exclude certain dependencies for a specific spawned node
+
+  Add the `:exclude` list as follows:
+
+      setup do
+        {:ok, spawned} =
+          ExUnited.spawn(
+            bruce: [
+              code_paths: [
+                "test/nodes/bruce"
+              ],
+              exclude: [
+                :my_unused_dependency
+              ],
+              supervise: [MyAwesomeGenServer]
+            ],
+            clark: [
+              code_paths: [
+                "test/nodes/clark"
+              ],
+              supervise: [MyOtherAwesomeGenServer]
+            ]
+          )
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
 
   ### Add supervisioning
 
@@ -277,6 +309,7 @@ defmodule ExUnited do
 
     * `:code_paths` - a list of directories that will be included (please note
       that the file called `config.exs` is supported for `Mix.Config`)
+    * `:exclude` - a list of dependencies that will be excluded
     * `:supervise` - the child spec(s) used for supervisioning
 
   Aside from options for configuring individual nodes, as a second argument, you
@@ -325,7 +358,7 @@ defmodule ExUnited do
         spawned
       end
 
-  Exclude certain dependencies:
+  Exclude certain dependencies for all nodes:
 
       setup do
         {:ok, spawned} = ExUnited.spawn([:bruce, :clark], [:verbose, exclude: [:inch_ex]])
@@ -345,6 +378,35 @@ defmodule ExUnited do
             bruce: [
               code_paths: [
                 "test/nodes/bruce"
+              ],
+              supervise: [MyAwesomeGenServer]
+            ],
+            clark: [
+              code_paths: [
+                "test/nodes/clark"
+              ],
+              supervise: [MyOtherAwesomeGenServer]
+            ]
+          )
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
+
+  Exclude certain dependencies for a specific spawned node:
+
+      setup do
+        {:ok, spawned} =
+          ExUnited.spawn(
+            bruce: [
+              code_paths: [
+                "test/nodes/bruce"
+              ],
+              exclude: [
+                :my_unused_dependency
               ],
               supervise: [MyAwesomeGenServer]
             ],
@@ -409,7 +471,7 @@ defmodule ExUnited do
             name -> {name, []}
           end
 
-        generate_files(name, opts, spec)
+        generate_mix_exs(name, opts, spec)
         {name, spawn_node(name, opts)}
       end)
       |> Enum.into(%{})
@@ -453,42 +515,20 @@ defmodule ExUnited do
     :ok
   end
 
-  @spec generate_files(atom, [atom | keyword], keyword) :: :ok
-  defp generate_files(name, opts, spec) do
-    name
-    |> config_exs_path()
-    |> File.write(config(spec))
-
+  @spec generate_mix_exs(atom, [atom | keyword], keyword) :: :ok
+  defp generate_mix_exs(name, opts, spec) do
     name
     |> mix_exs_path()
-    |> File.write(mix(name, opts, spec))
+    |> File.write(mix_exs(opts, spec))
 
     :ok
   end
 
-  @spec config_exs_path(atom) :: binary
-  defp config_exs_path(name), do: "/tmp/#{name}-config.exs"
-
   @spec mix_exs_path(atom) :: binary
   defp mix_exs_path(name), do: "/tmp/#{name}-mix.exs"
 
-  @spec config(keyword) :: binary
-  defp config(spec) do
-    spec
-    |> Keyword.get(:code_paths, [])
-    |> List.wrap()
-    |> Enum.map(fn dir ->
-      Path.wildcard("#{dir}/config.exs")
-    end)
-    |> List.flatten()
-    |> case do
-      [config] -> File.read!(config)
-      [] -> File.read!(@emptyconfig)
-    end
-  end
-
-  @spec mix(atom, [atom | keyword], keyword) :: term
-  defp mix(name, opts, spec) do
+  @spec mix_exs([atom | keyword], keyword) :: term
+  defp mix_exs(opts, spec) do
     config = Mix.Project.config()
 
     project =
@@ -496,46 +536,71 @@ defmodule ExUnited do
       |> Keyword.take([:version, :elixir])
       |> Keyword.put(:app, :void)
       |> Keyword.put(:config_path, @emptyconfig)
-      |> Keyword.put(:elixirc_paths, elixirc_paths(spec))
-      |> Keyword.put(:deps, deps(config, opts))
+      |> Keyword.put(:elixirc_paths, elixirc_paths(opts, spec))
+      |> Keyword.put(:deps, deps(config, opts, spec))
 
     "../ex_united/mix.exs.eex"
     |> Path.expand(__ENV__.file)
     |> EEx.eval_file(
       project: project,
-      all_env: read_config(name),
+      all_env: read_config(opts, spec),
       supervised: supervised(spec)
     )
   end
 
-  @spec elixirc_paths(keyword) :: list
-  defp elixirc_paths(spec) do
-    Keyword.get(spec, :code_paths, [])
+  @spec elixirc_paths(keyword, keyword) :: list
+  defp elixirc_paths(opts, spec) do
+    app = Keyword.get(Mix.Project.config(), :app)
+
+    exclude =
+      @excluded_dependencies ++
+        List.wrap(Keyword.get(opts, :exclude)) ++
+        List.wrap(Keyword.get(spec, :exclude))
+
+    code_paths =
+      if Enum.member?(exclude, app) do
+        []
+      else
+        ["lib"]
+      end
+
+    code_paths ++ Keyword.get(spec, :code_paths, [])
   end
 
-  @spec deps(keyword, [atom | keyword]) :: list
-  defp deps(config, opts) do
+  @spec deps(keyword, [atom | keyword], keyword) :: list
+  defp deps(config, opts, spec) do
     exclude =
-      opts
-      |> Keyword.get(:exclude)
-      |> List.wrap()
-      |> Kernel.++(@excluded_dependencies)
+      @excluded_dependencies ++
+        List.wrap(Keyword.get(opts, :exclude)) ++
+        List.wrap(Keyword.get(spec, :exclude))
 
     config
     |> Keyword.get(:deps)
-    |> Kernel.++([{Keyword.get(config, :app), path: File.cwd!()}])
     |> Enum.reject(fn dep ->
       Enum.member?(exclude, elem(dep, 0))
     end)
   end
 
-  defp read_config(name) do
+  @spec read_config(keyword, keyword) :: keyword
+  defp read_config(opts, spec) do
+    config =
+      opts
+      |> elixirc_paths(spec)
+      |> Enum.map(fn dir ->
+        Path.wildcard("#{dir}/config.exs")
+      end)
+      |> List.flatten()
+      |> case do
+        [config] -> config
+        [] -> @emptyconfig
+      end
+
     if function_exported?(Config.Reader, :read!, 1) do
       Config.Reader
     else
       Mix.Config
     end
-    |> apply(:read!, [config_exs_path(name)])
+    |> apply(:read!, [config])
   end
 
   @spec supervised(keyword) :: binary

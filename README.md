@@ -113,9 +113,9 @@ Which results in the following when running tests:
   2 tests, 0 failures, 1 excluded
   ```
 
-### Exclude certain dependencies within spawned nodes
+### Exclude certain dependencies for all spawned nodes
 
-You can exclude certain (Mix) dependencies from your spawned nodes by for instance
+You can exclude certain (Mix) dependencies for ALL spawned nodes by for instance
 adding `exclude: [:inch_ex]` to the options. This can significantly improve
 the speed of your tests.
 
@@ -145,6 +145,7 @@ Aside from the list of atoms, you can also specify nodes as a keyword list in
 case you want to configure them. The following options are available:
 
 * `:code_paths` - a list of directories that will be included
+* `:exclude` - a list of dependencies that will be excluded
 * `:supervise` - the child spec(s) used for supervisioning
 
 ### Including additional code
@@ -175,6 +176,40 @@ the file called `config.exs` is supported for `Mix.Config`:
 See [test/ex_united/supervised_test.exs](https://github.com/archan937/ex_united/blob/v0.1.0/test/ex_united/supervised_test.exs#L7)
 with its corresponding [test/nodes/ronaldo](https://github.com/archan937/ex_united/tree/v0.1.0/test/nodes/ronaldo)
 as an example.
+
+### Exclude certain dependencies for a specific spawned node
+
+Add the `:exclude` list as follows:
+
+  ```elixir
+  setup do
+    {:ok, spawned} =
+      ExUnited.spawn(
+        bruce: [
+          code_paths: [
+            "test/nodes/bruce"
+          ],
+          exclude: [
+            :my_unused_dependency,
+            :my_current_project
+          ],
+          supervise: [MyAwesomeGenServer]
+        ],
+        clark: [
+          code_paths: [
+            "test/nodes/clark"
+          ],
+          supervise: [MyOtherAwesomeGenServer]
+        ]
+      )
+
+    on_exit(fn ->
+      ExUnited.teardown()
+    end)
+
+    spawned
+  end
+  ```
 
 ### Add supervisioning
 

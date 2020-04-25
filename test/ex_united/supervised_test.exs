@@ -39,13 +39,6 @@ defmodule ExUnited.SupervisedTest do
              ] = take(spawned, :command)
 
       assert """
-             use Mix.Config
-
-             config :void,
-               greet: "Hi, my name is FULLNAME"
-             """ == File.read!("/tmp/cristiano-config.exs")
-
-      assert """
              defmodule Void.MixProject do
                use Mix.Project
                def project do

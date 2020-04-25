@@ -22,12 +22,6 @@ defmodule ExUnitedTest do
              ] = take(spawned, :env)
 
       assert """
-             use Mix.Config
-
-             # Nothing to see here (sorry)
-             """ == File.read!("/tmp/ryan-config.exs")
-
-      assert """
              defmodule Void.MixProject do
                use Mix.Project
                def project do
@@ -199,13 +193,6 @@ defmodule ExUnitedTest do
              ] = take(spawned, :command)
 
       assert """
-             use Mix.Config
-
-             config :void,
-               question: "T'as pigé?"
-             """ == File.read!("/tmp/eric-config.exs")
-
-      assert """
              defmodule Void.MixProject do
                use Mix.Project
                def project do
@@ -279,12 +266,6 @@ defmodule ExUnitedTest do
       assert [
                "iex --name wayne@127.0.0.1 --erl '-connect_all false' -S mix run -e 'Node.connect(:\"captain@127.0.0.1\")'"
              ] = take(spawned, :command)
-
-      assert """
-             use Mix.Config
-
-             # Nothing to see here (sorry)
-             """ == File.read!("/tmp/wayne-config.exs")
 
       assert """
              defmodule Void.MixProject do
