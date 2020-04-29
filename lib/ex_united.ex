@@ -291,10 +291,20 @@ defmodule ExUnited do
       # test/test_helper.exs
       ExUnited.start()
 
+  As of version `0.1.2`, you can also start `ExUnit` yourself explicitly and add
+  `ExUnited.start(false)` instead:
+
+      # test/test_helper.exs
+      ExUnit.start()
+      ExUnited.start(false)
+
   """
-  @spec start() :: {:ok, pid}
-  def start do
-    ExUnit.start()
+  @spec start(boolean) :: {:ok, pid}
+  def start(start_ex_unit \\ true) do
+    if start_ex_unit do
+      ExUnit.start()
+    end
+
     Simmons.start_link()
   end
 

@@ -45,6 +45,15 @@ Replace the default `ExUnit.start()` invocation in the test helper file with
   ExUnited.start()
   ```
 
+As of version `0.1.2`, you can also start `ExUnit` yourself explicitly and add
+`ExUnited.start(false)` instead:
+
+  ```elixir
+  # test/test_helper.exs
+  ExUnit.start()
+  ExUnited.start(false)
+  ```
+
 ## Usage
 
 For using `ExUnited`, the two essential functions are:
