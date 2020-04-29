@@ -47,7 +47,7 @@ defmodule ExUnited.SupervisedTest do
                    elixirc_paths: ["test/nodes/ronaldo"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
-                   version: "0.1.1",
+                   version: "0.1.2",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
@@ -150,7 +150,7 @@ defmodule ExUnited.SupervisedTest do
                    elixirc_paths: ["test/nodes/keane"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
-                   version: "0.1.1",
+                   version: "0.1.2",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end

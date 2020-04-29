@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.2
+
+  * Add ability to use a different `MIX_ENV` when spawning nodes (solves `meck` related testing problems)
+  * Add boolean flag to not start ExUnit
+
 ## v0.1.1
 
   * Add `:exclude` option for individual spawned nodes
