@@ -1,4 +1,4 @@
-# ExUnited [![Build Status](https://secure.travis-ci.org/archan937/ex_united.png)](http://travis-ci.org/archan937/ex_united)
+# ExUnited [![Build Status](https://travis-ci.org/archan937/ex_united.svg?branch=master)](http://travis-ci.org/archan937/ex_united)
 
 Easily spawn Elixir nodes (supervising, Mix configured, easy asserted / refuted) within ExUnit tests
 
@@ -45,6 +45,8 @@ Replace the default `ExUnit.start()` invocation in the test helper file with
   ExUnited.start()
   ```
 
+### Explicitly start ExUnit yourself
+
 As of version `0.1.2`, you can also start `ExUnit` yourself explicitly and add
 `ExUnited.start(false)` instead:
 
@@ -52,6 +54,47 @@ As of version `0.1.2`, you can also start `ExUnit` yourself explicitly and add
   # test/test_helper.exs
   ExUnit.start()
   ExUnited.start(false)
+  ```
+
+### ATTENTION: When also using meck-based packages
+
+The following errors can occur when also using packages like
+[mock](https://hex.pm/packages/mock) or [MecksUnit](https://hex.pm/packages/mecks_unit)
+(which both use the Erlang library [meck](https://github.com/eproxus/meck) to
+mock functions) and spawning the nodes with the default environment `test`:
+
+* `(UndefinedFunctionError) function Some.Module.some_function/1 is undefined`
+* `(ErlangError) Erlang error: {{:undefined_module, < Some.Module >}`
+
+To tackle this, you should configure any other (Mix) environment to spawn the
+nodes with. Configure it like so:
+
+  ```elixir
+  # config/test.exs
+  import Config
+
+  config :ex_united,
+    mix_env: :dev
+  ```
+
+You might also want to consider using a bogus environment (e.g. `:void`) to skip
+the non-relevant `:dev` dependencies, like `credo` or `dialyxir` probably. That
+will save some compile time.
+
+And last but not least, please note that using a different environment within CI
+builds will require compiling the project in that particular environment on
+beforehand of the tests. Otherwise spawning the nodes will take too much time
+and that will cause timeout errors during the tests.
+
+  ```yaml
+  # .gitlab-ci.yml
+  before_script:
+    ...
+    - MIX_ENV=void mix deps.get
+    - MIX_ENV=void mix run -e 'IO.puts("Done.")'
+    - epmd -daemon
+  script:
+    - mix test
   ```
 
 ## Usage

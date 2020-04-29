@@ -626,10 +626,12 @@ defmodule ExUnited do
 
   @spec spawn_node(atom, [atom]) :: ExNode.t()
   defp spawn_node(name, opts) do
+    mix_env = Application.get_env(:ex_united, :mix_env, Mix.env())
+
     {node, port, command, env} =
       Simmons.summon(
         name,
-        env: [MIX_EXS: mix_exs_path(name)],
+        env: [MIX_ENV: mix_env, MIX_EXS: mix_exs_path(name)],
         connect: Enum.member?(opts, :connect),
         verbose: Enum.member?(opts, :verbose)
       )
