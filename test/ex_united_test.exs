@@ -30,6 +30,8 @@ defmodule ExUnitedTest do
                    elixirc_paths: [],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
+                   deps_path: "deps",
+                   lockfile: "mix.lock",
                    version: "0.1.2",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
@@ -98,6 +100,8 @@ defmodule ExUnitedTest do
                    elixirc_paths: [],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
+                   deps_path: "deps",
+                   lockfile: "mix.lock",
                    version: "0.1.2",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
@@ -201,6 +205,8 @@ defmodule ExUnitedTest do
                    elixirc_paths: ["test/nodes/cantona"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
+                   deps_path: "deps",
+                   lockfile: "mix.lock",
                    version: "0.1.2",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
@@ -276,6 +282,8 @@ defmodule ExUnitedTest do
                    elixirc_paths: ["test/nodes/rooney"],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
+                   deps_path: "deps",
+                   lockfile: "mix.lock",
                    version: "0.1.2",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
