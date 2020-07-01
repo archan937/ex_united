@@ -543,7 +543,7 @@ defmodule ExUnited do
 
     project =
       config
-      |> Keyword.take([:version, :elixir])
+      |> Keyword.take([:version, :elixir, :build_path, :deps_path, :lockfile])
       |> Keyword.put(:app, :void)
       |> Keyword.put(:config_path, @emptyconfig)
       |> Keyword.put(:elixirc_paths, elixirc_paths(opts, spec))
