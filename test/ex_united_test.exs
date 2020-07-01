@@ -32,7 +32,7 @@ defmodule ExUnitedTest do
                    app: :void,
                    deps_path: "deps",
                    lockfile: "mix.lock",
-                   version: "0.1.2",
+                   version: "0.1.3",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
@@ -102,7 +102,7 @@ defmodule ExUnitedTest do
                    app: :void,
                    deps_path: "deps",
                    lockfile: "mix.lock",
-                   version: "0.1.2",
+                   version: "0.1.3",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
@@ -207,7 +207,7 @@ defmodule ExUnitedTest do
                    app: :void,
                    deps_path: "deps",
                    lockfile: "mix.lock",
-                   version: "0.1.2",
+                   version: "0.1.3",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end
@@ -284,7 +284,7 @@ defmodule ExUnitedTest do
                    app: :void,
                    deps_path: "deps",
                    lockfile: "mix.lock",
-                   version: "0.1.2",
+                   version: "0.1.3",
                    elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
                  ]
                end

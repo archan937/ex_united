@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.3
+
+  * Add necessary configs to run on umbrella projects (credits to @PinheiroRodrigo)
+
 ## v0.1.2
 
   * Add ability to use a different `MIX_ENV` when spawning nodes (solves `meck` related testing problems)
