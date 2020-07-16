@@ -571,7 +571,7 @@ defmodule ExUnited do
   defp mix_exs_path(name), do: "/tmp/#{name}-mix.exs"
 
   @spec mix_exs([atom | keyword], keyword) :: term
-  defp mix_exs(opts, spec) do
+  def mix_exs(opts, spec) do
     config = Mix.Project.config()
 
     project =
