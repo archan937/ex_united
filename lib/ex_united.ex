@@ -281,6 +281,8 @@ defmodule ExUnited do
     :excoveralls
   ]
 
+  @included_dependencies []
+
   alias ExUnited.Node, as: ExNode
   alias ExUnited.Spawn, as: Simmons
 
@@ -320,6 +322,7 @@ defmodule ExUnited do
     * `:code_paths` - a list of directories that will be included (please note
       that the file called `config.exs` is supported for `Mix.Config`)
     * `:exclude` - a list of dependencies that will be excluded
+    * `:include` - a list of dependencies that will be included, in the format that is used in the mix file
     * `:supervise` - the child spec(s) used for supervisioning
 
   Aside from options for configuring individual nodes, as a second argument, you
@@ -417,6 +420,36 @@ defmodule ExUnited do
               ],
               exclude: [
                 :my_unused_dependency
+              ],
+              supervise: [MyAwesomeGenServer]
+            ],
+            clark: [
+              code_paths: [
+                "test/nodes/clark"
+              ],
+              supervise: [MyOtherAwesomeGenServer]
+            ]
+          )
+
+        on_exit(fn ->
+          ExUnited.teardown()
+        end)
+
+        spawned
+      end
+
+  Include certain dependencies for a specific spawned node:
+
+      setup do
+        {:ok, spawned} =
+          ExUnited.spawn(
+            bruce: [
+              code_paths: [
+                "test/nodes/bruce"
+              ],
+              include: [
+                {:my_lib, ">= 0.0.0"},
+                {:another_lib, "~> 1.0"}
               ],
               supervise: [MyAwesomeGenServer]
             ],
@@ -584,11 +617,17 @@ defmodule ExUnited do
         List.wrap(Keyword.get(opts, :exclude)) ++
         List.wrap(Keyword.get(spec, :exclude))
 
+    include =
+      @included_dependencies ++
+        List.wrap(Keyword.get(opts, :include)) ++
+        List.wrap(Keyword.get(spec, :include))
+
     config
     |> Keyword.get(:deps)
     |> Enum.reject(fn dep ->
       Enum.member?(exclude, elem(dep, 0))
     end)
+    |> Enum.concat(include)
   end
 
   @spec read_config(keyword, keyword) :: keyword
