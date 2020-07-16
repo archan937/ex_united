@@ -81,7 +81,7 @@ defmodule ExUnitedTest do
 
   describe "dependencies" do
     setup do
-      {:ok, spawned} = ExUnited.spawn([:ryan], exclude: [:inch_ex], include: [{:idna, ">= 0.0.0"}])
+      {:ok, spawned} = ExUnited.spawn([:ryan], exclude: [:inch_ex], include: [{:idna, ">= 0.0.0", optional: false}])
 
       on_exit(fn ->
         ExUnited.teardown()
@@ -96,7 +96,7 @@ defmodule ExUnitedTest do
                use Mix.Project
                def project do
                  [
-                   deps: [idna: ">= 0.0.0"],
+                   deps: [{:idna, ">= 0.0.0", [optional: false]}],
                    elixirc_paths: [],
                    config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
                    app: :void,
