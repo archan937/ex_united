@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.4
+
+  * Added include spawn option (credits to @thomas9911)
+
 ## v0.1.3
 
   * Add necessary configs to run on umbrella projects (credits to @PinheiroRodrigo)

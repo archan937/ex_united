@@ -32,7 +32,7 @@ To install ExUnited, please add `ex_united` to your list of dependencies in
   ```elixir
   def deps do
     [
-      {:ex_united, "~> 0.1.3", only: :test}
+      {:ex_united, "~> 0.1.4", only: :test}
     ]
   end
   ```
@@ -225,8 +225,8 @@ the file called `config.exs` is supported for `Mix.Config`:
   end
   ```
 
-See [test/ex_united/supervised_test.exs](https://github.com/archan937/ex_united/blob/v0.1.3/test/ex_united/supervised_test.exs#L7)
-with its corresponding [test/nodes/ronaldo](https://github.com/archan937/ex_united/tree/v0.1.3/test/nodes/ronaldo)
+See [test/ex_united/supervised_test.exs](https://github.com/archan937/ex_united/blob/v0.1.4/test/ex_united/supervised_test.exs#L7)
+with its corresponding [test/nodes/ronaldo](https://github.com/archan937/ex_united/tree/v0.1.4/test/nodes/ronaldo)
 as an example.
 
 ### Exclude certain dependencies for a specific spawned node
