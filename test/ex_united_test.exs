@@ -131,6 +131,54 @@ defmodule ExUnitedTest do
     end
   end
 
+  test "mix exs creates config correctly" do
+    assert """
+           defmodule Void.MixProject do
+             use Mix.Project
+             def project do
+               [
+                 deps: [app: ">= 0.0.0", my_lib: [path: "../my_lib"]],
+                 elixirc_paths: ["test/nodes/my_app"],
+                 config_path: "#{File.cwd!()}/lib/ex_united/config.exs",
+                 app: :void,
+                 deps_path: "deps",
+                 lockfile: "mix.lock",
+                 version: "0.1.3",
+                 elixir: "#{Keyword.get(Mix.Project.config(), :elixir)}"
+               ]
+             end
+             def application do
+               [mod: {Void.Application, []}]
+             end
+           end
+
+           defmodule Void.Application do
+             use Application
+             def start(_type, _args) do
+               load_config()
+               opts = [strategy: :one_for_one, name: Void.Supervisor]
+               Supervisor.start_link([], opts)
+             end
+             defp load_config do
+               []
+               |> Enum.each(fn {app, env} ->
+                 Enum.each(env, fn {key, value} ->
+                   Application.put_env(app, key, value)
+                 end)
+               end)
+             end
+           end
+           """ ==
+             ExUnited.mix_exs(
+               [
+                 exclude: :inch_ex,
+                 include: [{:app, ">= 0.0.0"}]
+               ],
+               include: [{:my_lib, path: "../my_lib"}],
+               code_paths: ["test/nodes/my_app"]
+             )
+  end
+
   describe "fully connected" do
     setup do
       {:ok, spawned} = ExUnited.spawn([:denis, :paul, :duncan], [:connect])
