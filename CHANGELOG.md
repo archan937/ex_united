@@ -1,8 +1,12 @@
 # Changelog
 
+## v0.1.5
+
+  * Add config for spawn timeout (credits to @thomas9911)
+
 ## v0.1.4
 
-  * Added include spawn option (credits to @thomas9911)
+  * Add include spawn option (credits to @thomas9911)
 
 ## v0.1.3
 
