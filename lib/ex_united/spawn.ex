@@ -142,7 +142,8 @@ defmodule ExUnited.Spawn do
   @spec summon(atom, keyword) ::
           {node, port, binary, [{charlist, charlist}]} | :noop
   def summon(name, opts \\ []) do
-    GenServer.call(@spawn, {:summon, name, opts})
+    timeout = Application.get_env(:ex_united, :summon_timeout, 5000)
+    GenServer.call(@spawn, {:summon, name, opts}, timeout)
   end
 
   @doc """
