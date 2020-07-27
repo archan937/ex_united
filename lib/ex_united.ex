@@ -266,6 +266,13 @@ defmodule ExUnited do
       end
 
   See `ExUnited.Case.as_node/2` for more information.
+
+  In some cases the summon of a node takes longer than five seconds. This can be changed in your config:
+  ```elixir
+  # in config/test.exs
+  config :ex_united,
+    summon_timeout: 15000
+  ```
   """
 
   @emptyconfig Path.expand(
