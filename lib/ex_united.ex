@@ -92,6 +92,9 @@ defmodule ExUnited do
   case you want to configure them. The following options are available:
 
   * `:code_paths` - a list of directories that will be included
+  * `:config_path` - the absolute config file path to be merged into the default config specs
+  * `:extra_applications` -  a list of extra applications that will be included, in the format that is used in the mix file
+  * `:include` - a list of dependencies that will be included, in the format that is used in the mix file
   * `:exclude` - a list of dependencies that will be excluded
   * `:supervise` - the child spec(s) used for supervisioning
 
@@ -327,7 +330,8 @@ defmodule ExUnited do
   The following options are available to configure nodes:
 
     * `:code_paths` - a list of directories that will be included (please note
-      that the file called `config.exs` is supported for `Mix.Config`)
+    * `:config_path` - the absolute config file path to be merged into the default config specs
+    * `:extra_applications` -  a list of extra applications that will be included, in the format that is used in the mix file
     * `:exclude` - a list of dependencies that will be excluded
     * `:include` - a list of dependencies that will be included, in the format that is used in the mix file
     * `:supervise` - the child spec(s) used for supervisioning
@@ -521,6 +525,7 @@ defmodule ExUnited do
             name -> {name, []}
           end
 
+        generate_config_exs(name, opts, spec)
         generate_mix_exs(name, opts, spec)
         {name, spawn_node(name, opts)}
       end)
@@ -569,7 +574,16 @@ defmodule ExUnited do
   defp generate_mix_exs(name, opts, spec) do
     name
     |> mix_exs_path()
-    |> File.write(mix_exs(opts, spec))
+    |> File.write(mix_exs(name, opts, spec))
+
+    :ok
+  end
+
+  @spec generate_config_exs(atom, [atom | keyword], keyword) :: :ok
+  defp generate_config_exs(name, opts, spec) do
+    name
+    |> config_exs_path()
+    |> File.write(config_exs(opts, spec))
 
     :ok
   end
@@ -577,15 +591,18 @@ defmodule ExUnited do
   @spec mix_exs_path(atom) :: binary
   defp mix_exs_path(name), do: "/tmp/#{name}-mix.exs"
 
-  @spec mix_exs([atom | keyword], keyword) :: term
-  def mix_exs(opts, spec) do
+  @spec config_exs_path(atom) :: binary
+  defp config_exs_path(name), do: "/tmp/#{name}-config.exs"
+
+  @spec mix_exs(atom, [atom | keyword], keyword) :: term
+  def mix_exs(name, opts, spec) do
     config = Mix.Project.config()
 
     project =
       config
       |> Keyword.take([:version, :elixir, :build_path, :deps_path, :lockfile])
       |> Keyword.put(:app, :void)
-      |> Keyword.put(:config_path, @emptyconfig)
+      |> Keyword.put(:config_path, config_exs_path(name))
       |> Keyword.put(:elixirc_paths, elixirc_paths(opts, spec))
       |> Keyword.put(:deps, deps(config, opts, spec))
 
@@ -593,9 +610,27 @@ defmodule ExUnited do
     |> Path.expand(__ENV__.file)
     |> EEx.eval_file(
       project: project,
+      extra_applications: Keyword.get(spec, :extra_applications, []),
       all_env: read_config(opts, spec),
       supervised: supervised(spec)
     )
+  end
+
+  @spec config_exs([atom | keyword], keyword) :: term
+  def config_exs(opts, spec) do
+    config = Keyword.get(spec, :config_path, @emptyconfig)
+
+    config_specs =
+      Keyword.merge(
+        # Default config
+        read_config(opts, spec),
+        # Spec defined config
+        load_config_specs(config)
+      )
+
+    "../ex_united/config.exs.eex"
+    |> Path.expand(__ENV__.file)
+    |> EEx.eval_file(project_config: config_specs)
   end
 
   @spec elixirc_paths(keyword, keyword) :: list
@@ -639,24 +674,27 @@ defmodule ExUnited do
 
   @spec read_config(keyword, keyword) :: keyword
   defp read_config(opts, spec) do
-    config =
-      opts
-      |> elixirc_paths(spec)
-      |> Enum.map(fn dir ->
-        Path.wildcard("#{dir}/config.exs")
-      end)
-      |> List.flatten()
-      |> case do
-        [config] -> config
-        [] -> @emptyconfig
-      end
+    opts
+    |> elixirc_paths(spec)
+    |> Enum.map(fn dir ->
+      Path.wildcard("#{dir}/config.exs")
+    end)
+    |> List.flatten()
+    |> case do
+      [config] -> config
+      [] -> @emptyconfig
+    end
+    |> load_config_specs()
+  end
 
+  @spec load_config_specs(binary) :: keyword
+  defp load_config_specs(config_path) do
     if function_exported?(Config.Reader, :read!, 1) do
       Config.Reader
     else
       Mix.Config
     end
-    |> apply(:read!, [config])
+    |> apply(:read!, [config_path])
   end
 
   @spec supervised(keyword) :: binary

@@ -18,6 +18,8 @@ the readability of the tests and more.
   * Spin up "partially connected" vs "fully connected" nodes
   * Run in "verbose" mode which prints a colorized STDOUT of the nodes
   * Specify extra "code paths" which will be included (`config.exs` included)
+  * Specify extra "config path" which will be included
+  * Support adding "extra applications"
   * Support child supervisioning within a spawned node
   * Exclude certain dependencies for spawned nodes
   * Easily(!) assert and refute within the context of spawned nodes
@@ -197,6 +199,11 @@ Aside from the list of atoms, you can also specify nodes as a keyword list in
 case you want to configure them. The following options are available:
 
 * `:code_paths` - a list of directories that will be included
+* `:config_path` - an absolute path to a custom config file that should be used
+* `:extra_applications` -  a list of extra applications that will be included, in 
+  the format that is used in the mix file
+* `:include` - a list of dependencies that will be included, in the format that is
+  used in the mix file
 * `:exclude` - a list of dependencies that will be excluded
 * `:supervise` - the child spec(s) used for supervisioning
 
@@ -252,6 +259,50 @@ Add the `:exclude` list as follows:
             "test/nodes/clark"
           ],
           supervise: [MyOtherAwesomeGenServer]
+        ]
+      )
+
+    on_exit(fn ->
+      ExUnited.teardown()
+    end)
+
+    spawned
+  end
+  ```
+
+### Using custom config path
+
+Add the `:config_path` key as follows:
+
+  ```elixir
+  setup do
+    {:ok, spawned} =
+      ExUnited.spawn(
+        bruce: [
+          code_paths: [
+            "test/nodes/bruce"
+          ],
+          config_path: Path.resolve("nodes/cantona/config.exs", __ENV__.file)
+        ]
+      )
+
+    on_exit(fn ->
+      ExUnited.teardown()
+    end)
+
+    spawned
+  end
+  ```
+### Adding extra applications
+
+Add the `:extra_applications` list as follows:
+
+  ```elixir
+  setup do
+    {:ok, spawned} =
+      ExUnited.spawn(
+        bruce: [
+          extra_applications: [:logger]
         ]
       )
 

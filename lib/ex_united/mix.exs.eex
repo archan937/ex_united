@@ -4,7 +4,10 @@ defmodule Void.MixProject do
 <%= Regex.replace(~r/^/m, inspect(project, pretty: true), "    ") %>
   end
   def application do
-    [mod: {Void.Application, []}]
+    [
+      mod: {Void.Application, []},
+      extra_applications: <%= inspect(extra_applications, pretty: true) %>
+    ]
   end
 end
 
