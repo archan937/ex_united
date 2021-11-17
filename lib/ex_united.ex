@@ -275,6 +275,10 @@ defmodule ExUnited do
   ```
   """
 
+  @mix_exs_template "../ex_united/mix.exs.eex"
+                    |> Path.expand(__ENV__.file)
+                    |> File.read!()
+
   @emptyconfig Path.expand(
                  "../ex_united/config.exs",
                  __ENV__.file
@@ -589,9 +593,7 @@ defmodule ExUnited do
       |> Keyword.put(:elixirc_paths, elixirc_paths(opts, spec))
       |> Keyword.put(:deps, deps(config, opts, spec))
 
-    "../ex_united/mix.exs.eex"
-    |> Path.expand(__ENV__.file)
-    |> EEx.eval_file(
+    EEx.eval_string(@mix_exs_template,
       project: project,
       all_env: read_config(opts, spec),
       supervised: supervised(spec)
